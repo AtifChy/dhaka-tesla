@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'3fecf83201d2125a5e17ce680ccb9a72884912bbbee15815871e6564391d2f60'>;
+  StorageHashBase<'2cff04a346370152eba83ff05e0272405893eebc4217cb7aebfc953df320a737'>;
 export type ExecutionHash =
   ExecutionHashBase<'d8f81fe02a1ff55cf0d55f9dcb9d096ad62a18f8feafb2bca547a15a44d27d04'>;
 export type ProfileHash =
@@ -274,7 +274,7 @@ export type FieldOutputTypes = {
       readonly status:
         'REQUESTED' | 'MATCHED' | 'DRIVER_ARRIVED' | 'STARTED' | 'COMPLETED' | 'CANCELED';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly vechicleId: CodecTypes['pg/int4@1']['output'];
+      readonly vehicleId: CodecTypes['pg/int4@1']['output'];
     };
     readonly PoolMember: {
       readonly fare: CodecTypes['pg/numeric@1']['output'];
@@ -346,7 +346,7 @@ export type FieldInputTypes = {
       readonly status:
         'REQUESTED' | 'MATCHED' | 'DRIVER_ARRIVED' | 'STARTED' | 'COMPLETED' | 'CANCELED';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly vechicleId: CodecTypes['pg/int4@1']['input'];
+      readonly vehicleId: CodecTypes['pg/int4@1']['input'];
     };
     readonly PoolMember: {
       readonly fare: CodecTypes['pg/numeric@1']['input'];
@@ -426,7 +426,7 @@ export type StorageColumnTypes = {
       readonly status:
         'REQUESTED' | 'MATCHED' | 'DRIVER_ARRIVED' | 'STARTED' | 'COMPLETED' | 'CANCELED';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly vechicleId: CodecTypes['pg/int4@1']['output'];
+      readonly vehicleId: CodecTypes['pg/int4@1']['output'];
     };
     readonly requests: {
       readonly corridor: CodecTypes['pg/text@1']['output'];
@@ -498,7 +498,7 @@ export type StorageColumnInputTypes = {
       readonly status:
         'REQUESTED' | 'MATCHED' | 'DRIVER_ARRIVED' | 'STARTED' | 'COMPLETED' | 'CANCELED';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly vechicleId: CodecTypes['pg/int4@1']['input'];
+      readonly vehicleId: CodecTypes['pg/int4@1']['input'];
     };
     readonly requests: {
       readonly corridor: CodecTypes['pg/text@1']['input'];
@@ -565,7 +565,7 @@ export namespace Models {
     pickupZone: CodecTypes['pg/text@1']['output'];
     status: 'REQUESTED' | 'MATCHED' | 'DRIVER_ARRIVED' | 'STARTED' | 'COMPLETED' | 'CANCELED';
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    vechicleId: CodecTypes['pg/int4@1']['output'];
+    vehicleId: CodecTypes['pg/int4@1']['output'];
     driver: public_User;
     events: public_Event[];
     members: public_PoolMember[];
@@ -920,7 +920,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                   readonly nullable: false;
                 };
-                readonly vechicleId: {
+                readonly vehicleId: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
@@ -948,15 +948,15 @@ type ContractBase = Omit<
                   readonly unique: false;
                 },
                 {
-                  readonly name: 'pools_vechicleId_idx_a071c815';
-                  readonly prefix: 'pools_vechicleId_idx';
-                  readonly columns: readonly ['vechicleId'];
+                  readonly name: 'pools_vehicleId_idx_e2df58fc';
+                  readonly prefix: 'pools_vehicleId_idx';
+                  readonly columns: readonly ['vehicleId'];
                   readonly unique: false;
                 },
                 {
-                  readonly name: 'pools_vechicleId_status_idx_c10bfc5c';
-                  readonly prefix: 'pools_vechicleId_status_idx';
-                  readonly columns: readonly ['vechicleId', 'status'];
+                  readonly name: 'pools_vehicleId_status_idx_a4d785a6';
+                  readonly prefix: 'pools_vehicleId_status_idx';
+                  readonly columns: readonly ['vehicleId', 'status'];
                   readonly unique: false;
                 },
               ];
@@ -977,7 +977,7 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'pools';
-                    readonly columns: readonly ['vechicleId'];
+                    readonly columns: readonly ['vehicleId'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -1401,7 +1401,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
               };
-              readonly vechicleId: {
+              readonly vehicleId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
@@ -1446,7 +1446,7 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
                 readonly on: {
-                  readonly localFields: readonly ['vechicleId'];
+                  readonly localFields: readonly ['vehicleId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -1464,7 +1464,7 @@ type ContractBase = Omit<
                 readonly pickupZone: { readonly column: 'pickupZone' };
                 readonly status: { readonly column: 'status' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
-                readonly vechicleId: { readonly column: 'vechicleId' };
+                readonly vehicleId: { readonly column: 'vehicleId' };
               };
             };
           };
@@ -1796,7 +1796,7 @@ type ContractBase = Omit<
                 readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['vechicleId'];
+                  readonly targetFields: readonly ['vehicleId'];
                 };
               };
             };

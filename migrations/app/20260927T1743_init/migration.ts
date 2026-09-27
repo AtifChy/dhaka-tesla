@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node
-import type { Contract as End } from '../../snapshots/3fecf83201d2125a5e17ce680ccb9a72884912bbbee15815871e6564391d2f60/contract';
-import endContract from '../../snapshots/3fecf83201d2125a5e17ce680ccb9a72884912bbbee15815871e6564391d2f60/contract.json' with { type: 'json' };
+import type { Contract as End } from '../../snapshots/2cff04a346370152eba83ff05e0272405893eebc4217cb7aebfc953df320a737/contract';
+import endContract from '../../snapshots/2cff04a346370152eba83ff05e0272405893eebc4217cb7aebfc953df320a737/contract.json' with { type: 'json' };
 import {
   Migration,
   MigrationCLI,
@@ -96,7 +96,7 @@ export default class M extends Migration<never, End> {
             notNull: true,
             codecRef: { codecId: 'pg/timestamptz-string@1' },
           }),
-          col('vechicleId', 'int4', { notNull: true, codecRef: { codecId: 'pg/int4@1' } }),
+          col('vehicleId', 'int4', { notNull: true, codecRef: { codecId: 'pg/int4@1' } }),
         ],
         constraints: [
           primaryKey(['id']),
@@ -279,14 +279,14 @@ export default class M extends Migration<never, End> {
       this.createIndex({
         schema: 'public',
         table: 'pools',
-        index: 'pools_vechicleId_idx_a071c815',
-        columns: ['vechicleId'],
+        index: 'pools_vehicleId_idx_e2df58fc',
+        columns: ['vehicleId'],
       }),
       this.createIndex({
         schema: 'public',
         table: 'pools',
-        index: 'pools_vechicleId_status_idx_c10bfc5c',
-        columns: ['vechicleId', 'status'],
+        index: 'pools_vehicleId_status_idx_a4d785a6',
+        columns: ['vehicleId', 'status'],
       }),
       this.createIndex({
         schema: 'public',
@@ -376,8 +376,8 @@ export default class M extends Migration<never, End> {
         schema: 'public',
         table: 'pools',
         foreignKey: {
-          name: 'pools_vechicleId_fkey',
-          columns: ['vechicleId'],
+          name: 'pools_vehicleId_fkey',
+          columns: ['vehicleId'],
           references: { schema: 'public', table: 'vehicles', columns: ['id'] },
           onDelete: 'restrict',
         },

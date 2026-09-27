@@ -323,7 +323,7 @@
                   "kind": "scalar"
                 }
               },
-              "vechicleId": {
+              "vehicleId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
@@ -383,7 +383,7 @@
                 "nullable": false,
                 "on": {
                   "localFields": [
-                    "vechicleId"
+                    "vehicleId"
                   ],
                   "targetFields": [
                     "id"
@@ -424,8 +424,8 @@
                 "updatedAt": {
                   "column": "updatedAt"
                 },
-                "vechicleId": {
-                  "column": "vechicleId"
+                "vehicleId": {
+                  "column": "vehicleId"
                 }
               },
               "namespaceId": "public",
@@ -962,7 +962,7 @@
                     "id"
                   ],
                   "targetFields": [
-                    "vechicleId"
+                    "vehicleId"
                   ]
                 },
                 "to": {
@@ -1390,7 +1390,7 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
-                "vechicleId": {
+                "vehicleId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
@@ -1418,7 +1418,7 @@
                   "onDelete": "restrict",
                   "source": {
                     "columns": [
-                      "vechicleId"
+                      "vehicleId"
                     ],
                     "namespaceId": "public",
                     "tableName": "pools"
@@ -1462,19 +1462,19 @@
                 },
                 {
                   "columns": [
-                    "vechicleId"
+                    "vehicleId"
                   ],
-                  "name": "pools_vechicleId_idx_a071c815",
-                  "prefix": "pools_vechicleId_idx",
+                  "name": "pools_vehicleId_idx_e2df58fc",
+                  "prefix": "pools_vehicleId_idx",
                   "unique": false
                 },
                 {
                   "columns": [
-                    "vechicleId",
+                    "vehicleId",
                     "status"
                   ],
-                  "name": "pools_vechicleId_status_idx_c10bfc5c",
-                  "prefix": "pools_vechicleId_status_idx",
+                  "name": "pools_vehicleId_status_idx_a4d785a6",
+                  "prefix": "pools_vehicleId_status_idx",
                   "unique": false
                 }
               ],
@@ -1866,7 +1866,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "3fecf83201d2125a5e17ce680ccb9a72884912bbbee15815871e6564391d2f60"
+    "storageHash": "2cff04a346370152eba83ff05e0272405893eebc4217cb7aebfc953df320a737"
   },
   "execution": {
     "executionHash": "d8f81fe02a1ff55cf0d55f9dcb9d096ad62a18f8feafb2bca547a15a44d27d04",

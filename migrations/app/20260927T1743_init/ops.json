@@ -119,7 +119,7 @@
     "execute": [
       {
         "description": "create table \"pools\"",
-        "sql": "CREATE TABLE \"public\".\"pools\" (\n  \"capacity\" int4 NOT NULL,\n  \"corridor\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"driverId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"occupiedSeats\" int4 DEFAULT 0 NOT NULL,\n  \"pickupZone\" text NOT NULL,\n  \"status\" text DEFAULT 'MATCHED' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"vechicleId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"pool_capacity_positive_2e07dccc\" CHECK (capacity > 0),\n  CONSTRAINT \"pool_occupied_seats_nonnegative_c3fcf762\" CHECK (\"occupiedSeats\" >= 0),\n  CONSTRAINT \"pools_status_check_0b631e14\" CHECK (\"status\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED'))\n)",
+        "sql": "CREATE TABLE \"public\".\"pools\" (\n  \"capacity\" int4 NOT NULL,\n  \"corridor\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"driverId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"occupiedSeats\" int4 DEFAULT 0 NOT NULL,\n  \"pickupZone\" text NOT NULL,\n  \"status\" text DEFAULT 'MATCHED' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"vehicleId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"pool_capacity_positive_2e07dccc\" CHECK (capacity > 0),\n  CONSTRAINT \"pool_occupied_seats_nonnegative_c3fcf762\" CHECK (\"occupiedSeats\" >= 0),\n  CONSTRAINT \"pools_status_check_0b631e14\" CHECK (\"status\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED'))\n)",
         "params": []
       }
     ],
@@ -728,79 +728,79 @@
     ]
   },
   {
-    "id": "index.pools.pools_vechicleId_idx_a071c815",
-    "label": "Create index \"pools_vechicleId_idx_a071c815\" on \"pools\"",
+    "id": "index.pools.pools_vehicleId_idx_e2df58fc",
+    "label": "Create index \"pools_vehicleId_idx_e2df58fc\" on \"pools\"",
     "operationClass": "additive",
     "target": {
       "id": "postgres",
       "details": {
         "schema": "public",
         "objectType": "index",
-        "name": "pools_vechicleId_idx_a071c815",
+        "name": "pools_vehicleId_idx_e2df58fc",
         "table": "pools"
       }
     },
     "precheck": [
       {
-        "description": "ensure index \"pools_vechicleId_idx_a071c815\" does not exist",
+        "description": "ensure index \"pools_vehicleId_idx_e2df58fc\" does not exist",
         "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
         "params": [
-          "\"public\".\"pools_vechicleId_idx_a071c815\""
+          "\"public\".\"pools_vehicleId_idx_e2df58fc\""
         ]
       }
     ],
     "execute": [
       {
-        "description": "create index \"pools_vechicleId_idx_a071c815\"",
-        "sql": "CREATE INDEX \"pools_vechicleId_idx_a071c815\" ON \"public\".\"pools\" (\"vechicleId\")",
+        "description": "create index \"pools_vehicleId_idx_e2df58fc\"",
+        "sql": "CREATE INDEX \"pools_vehicleId_idx_e2df58fc\" ON \"public\".\"pools\" (\"vehicleId\")",
         "params": []
       }
     ],
     "postcheck": [
       {
-        "description": "verify index \"pools_vechicleId_idx_a071c815\" exists",
+        "description": "verify index \"pools_vehicleId_idx_e2df58fc\" exists",
         "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
         "params": [
-          "\"public\".\"pools_vechicleId_idx_a071c815\""
+          "\"public\".\"pools_vehicleId_idx_e2df58fc\""
         ]
       }
     ]
   },
   {
-    "id": "index.pools.pools_vechicleId_status_idx_c10bfc5c",
-    "label": "Create index \"pools_vechicleId_status_idx_c10bfc5c\" on \"pools\"",
+    "id": "index.pools.pools_vehicleId_status_idx_a4d785a6",
+    "label": "Create index \"pools_vehicleId_status_idx_a4d785a6\" on \"pools\"",
     "operationClass": "additive",
     "target": {
       "id": "postgres",
       "details": {
         "schema": "public",
         "objectType": "index",
-        "name": "pools_vechicleId_status_idx_c10bfc5c",
+        "name": "pools_vehicleId_status_idx_a4d785a6",
         "table": "pools"
       }
     },
     "precheck": [
       {
-        "description": "ensure index \"pools_vechicleId_status_idx_c10bfc5c\" does not exist",
+        "description": "ensure index \"pools_vehicleId_status_idx_a4d785a6\" does not exist",
         "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
         "params": [
-          "\"public\".\"pools_vechicleId_status_idx_c10bfc5c\""
+          "\"public\".\"pools_vehicleId_status_idx_a4d785a6\""
         ]
       }
     ],
     "execute": [
       {
-        "description": "create index \"pools_vechicleId_status_idx_c10bfc5c\"",
-        "sql": "CREATE INDEX \"pools_vechicleId_status_idx_c10bfc5c\" ON \"public\".\"pools\" (\"vechicleId\", \"status\")",
+        "description": "create index \"pools_vehicleId_status_idx_a4d785a6\"",
+        "sql": "CREATE INDEX \"pools_vehicleId_status_idx_a4d785a6\" ON \"public\".\"pools\" (\"vehicleId\", \"status\")",
         "params": []
       }
     ],
     "postcheck": [
       {
-        "description": "verify index \"pools_vechicleId_status_idx_c10bfc5c\" exists",
+        "description": "verify index \"pools_vehicleId_status_idx_a4d785a6\" exists",
         "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
         "params": [
-          "\"public\".\"pools_vechicleId_status_idx_c10bfc5c\""
+          "\"public\".\"pools_vehicleId_status_idx_a4d785a6\""
         ]
       }
     ]
@@ -1214,24 +1214,24 @@
     ]
   },
   {
-    "id": "foreignKey.pools.pools_vechicleId_fkey",
-    "label": "Add foreign key \"pools_vechicleId_fkey\" on \"pools\"",
+    "id": "foreignKey.pools.pools_vehicleId_fkey",
+    "label": "Add foreign key \"pools_vehicleId_fkey\" on \"pools\"",
     "operationClass": "additive",
     "target": {
       "id": "postgres",
       "details": {
         "schema": "public",
         "objectType": "foreignKey",
-        "name": "pools_vechicleId_fkey",
+        "name": "pools_vehicleId_fkey",
         "table": "pools"
       }
     },
     "precheck": [
       {
-        "description": "ensure FK \"pools_vechicleId_fkey\" does not exist",
+        "description": "ensure FK \"pools_vehicleId_fkey\" does not exist",
         "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
         "params": [
-          "pools_vechicleId_fkey",
+          "pools_vehicleId_fkey",
           "public",
           "\"public\".\"pools\""
         ]
@@ -1239,16 +1239,16 @@
     ],
     "execute": [
       {
-        "description": "add FK \"pools_vechicleId_fkey\"",
-        "sql": "ALTER TABLE \"public\".\"pools\"\nADD CONSTRAINT \"pools_vechicleId_fkey\"\nFOREIGN KEY (\"vechicleId\")\nREFERENCES \"public\".\"vehicles\" (\"id\")\nON DELETE RESTRICT"
+        "description": "add FK \"pools_vehicleId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"pools\"\nADD CONSTRAINT \"pools_vehicleId_fkey\"\nFOREIGN KEY (\"vehicleId\")\nREFERENCES \"public\".\"vehicles\" (\"id\")\nON DELETE RESTRICT"
       }
     ],
     "postcheck": [
       {
-        "description": "verify FK \"pools_vechicleId_fkey\" exists",
+        "description": "verify FK \"pools_vehicleId_fkey\" exists",
         "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
         "params": [
-          "pools_vechicleId_fkey",
+          "pools_vehicleId_fkey",
           "public",
           "\"public\".\"pools\""
         ]

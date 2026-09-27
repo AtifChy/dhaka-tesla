@@ -80,8 +80,8 @@ model Pool {
   id            Int                        @id @default(autoincrement())
   driverId      Int
   driver        User                       @relation(fields:[driverId], references:[id], onDelete: Restrict)
-  vechicleId    Int
-  vehicle       Vehicle                    @relation(fields:[vechicleId], references:[id], onDelete: Restrict)
+  vehicleId     Int
+  vehicle       Vehicle                    @relation(fields:[vehicleId], references:[id], onDelete: Restrict)
   status        Status                     @default(MATCHED)
   pickupZone    String
   corridor      String
@@ -95,7 +95,7 @@ model Pool {
   @@check(expression: "capacity > 0", name: "pool_capacity_positive")
   @@check(expression: "\"occupiedSeats\" >= 0", name: "pool_occupied_seats_nonnegative")
   @@index([driverId, status])
-  @@index([vechicleId, status])
+  @@index([vehicleId, status])
   @@index([pickupZone, corridor, status])
   @@map("pools")
 }
