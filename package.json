@@ -23,6 +23,10 @@
     "skills:sync": "prisma skills sync || exit 0",
     "start": "node dist/server.mjs",
     "postinstall": "prisma skills sync || exit 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "lint": "oxlint src/ text/",
@@ -52,13 +56,15 @@
     "@prisma/dev": "0.25.2",
     "@types/node": "^26.6.3",
     "@types/passport-jwt": "^4.0.1",
+    "@vitest/coverage-v8": "^5.0.2",
     "oxfmt": "^0.70.0",
     "oxlint": "^1.85.0",
     "oxlint-tsgolint": "^7.0.2003",
     "prisma": "8.0.0-rc.17",
     "tsdown": "^0.23.0",
     "tsx": "^4.21.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
   },
   "overrides": {
     "effect": "4.0.0-rc.112"
