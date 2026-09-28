@@ -8,6 +8,7 @@ import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { RolesGuard } from "./common/auth/roles.guard";
 import { validateEnv } from "./config/env";
+import { DriverModule } from "./driver/driver.module";
 import { PrismaModule } from "./prisma.module";
 import { RidesModule } from "./rides/rides.module";
 
@@ -17,6 +18,7 @@ import { RidesModule } from "./rides/rides.module";
     PrismaModule,
     AuthModule,
     RidesModule,
+    DriverModule,
   ],
   controllers: [AppController],
   providers: [
