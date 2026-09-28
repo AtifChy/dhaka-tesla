@@ -1,4 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ZodSerializerDto } from "nestjs-zod";
 
 import type { AuthUser } from "../common/auth/auth-user";
@@ -12,6 +13,8 @@ import {
   VehicleResponseDto,
 } from "./dto/driver-response.dto";
 
+@ApiTags("driver")
+@ApiBearerAuth()
 @Roles("DRIVER")
 @Controller("driver")
 export class DriverController {

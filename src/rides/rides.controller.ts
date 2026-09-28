@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ZodSerializerDto } from "nestjs-zod";
 
 import type { AuthUser } from "../common/auth/auth-user";
@@ -9,6 +10,8 @@ import { RideListResponseDto, RideResponseDto } from "./dto/ride-response.dto";
 import { RouteOptionsResponseDto } from "./dto/route-option.dto";
 import { RidesService } from "./rides.service";
 
+@ApiTags("rides")
+@ApiBearerAuth()
 @Roles("PASSENGER")
 @Controller("rides")
 export class RidesController {
