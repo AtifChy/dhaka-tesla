@@ -1,11 +1,16 @@
-import { Injectable } from "@nestjs/common";
-import { db, listUsers, type StarterUser } from "./prisma/users";
+import { Injectable, type OnApplicationShutdown, type OnModuleInit } from "@nestjs/common";
+
+import { connectDatabase, db } from "./prisma/db";
 
 @Injectable()
-export class PrismaService {
+export class PrismaService implements OnModuleInit, OnApplicationShutdown {
   readonly db = db;
 
-  listUsers(limit = 10): Promise<StarterUser[]> {
-    return listUsers(limit);
+  async onModuleInit() {
+    await connectDatabase();
+  }
+
+  async onApplicationShutdown() {
+    await this.db.close();
   }
 }
