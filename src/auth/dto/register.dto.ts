@@ -7,4 +7,10 @@ const registerSchema = z.object({
   password: z.string().min(10).max(128),
 });
 
+const registerDriverSchema = registerSchema.extend({
+  vehicleName: z.string().trim().min(2).max(80),
+  vehicleCapacity: z.number().int().min(1).max(6),
+});
+
 export class RegisterDto extends createZodDto(registerSchema) {}
+export class RegisterDriverDto extends createZodDto(registerDriverSchema) {}

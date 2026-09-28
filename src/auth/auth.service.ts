@@ -4,7 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma.service";
 import type { AuthResponseDto } from "./dto/auth-response.dto";
 import type { LoginDto } from "./dto/login.dto";
-import type { RegisterDto } from "./dto/register.dto";
+import type { RegisterDriverDto, RegisterDto } from "./dto/register.dto";
 import type { AccessTokenPayload } from "./jwt-payload";
 import { PasswordService } from "./password.service";
 
@@ -33,6 +33,37 @@ export class AuthService {
       email: input.email,
       passwordHash,
       role: "PASSENGER",
+    });
+
+    return this.issueToken(user);
+  }
+
+  async registerDriver(input: RegisterDriverDto): Promise<AuthResponseDto> {
+    const existing = await this.prisma.db.orm.public.User.where({ email: input.email }).first();
+    if (existing) throw new ConflictException("An account already uses this email");
+
+    const passwordHash = await this.passwords.hash(input.password);
+    const user = await this.prisma.db.transaction(async (transaction) => {
+      const created = await transaction.orm.public.User.select(
+        "id",
+        "name",
+        "email",
+        "role",
+      ).create({
+        name: input.name,
+        email: input.email,
+        passwordHash,
+        role: "DRIVER",
+      });
+
+      await transaction.orm.public.Vehicle.create({
+        driverId: created.id,
+        name: input.vehicleName,
+        capacity: input.vehicleCapacity,
+        isOnline: false,
+      });
+
+      return created;
     });
 
     return this.issueToken(user);

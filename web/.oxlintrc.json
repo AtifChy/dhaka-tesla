@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y", "nextjs", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": [".next/", "node_modules/", "next-env.d.ts"],
+  "settings": {
+    "next": {
+      "rootDir": ["."]
+    }
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/set-state-in-effect": "off",
+    "typescript/no-floating-promises": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  }
+}

@@ -28,7 +28,7 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-development-only-change-this-secret-1234}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,6 +53,36 @@ services:
           "bun",
           "-e",
           "const response = await fetch('http://127.0.0.1:3000/api/v1/health'); if (!response.ok) process.exit(1);",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        API_INTERNAL_URL: http://api:3000
+    image: dhaka-tesla-pool-web:local
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "${WEB_PORT:-3001}:3001"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "const response = await fetch('http://127.0.0.1:3001'); if (!response.ok) process.exit(1);",
         ]
       interval: 5s
       timeout: 3s
