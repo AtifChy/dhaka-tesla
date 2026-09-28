@@ -1,0 +1,170 @@
+[
+  {
+    "id": "dropCheckConstraint.requests.request_estimated_fare_nonnegative_781981e5",
+    "label": "Drop check constraint \"request_estimated_fare_nonnegative_781981e5\" on \"requests\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "request_estimated_fare_nonnegative_781981e5",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"request_estimated_fare_nonnegative_781981e5\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_estimated_fare_nonnegative_781981e5",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"request_estimated_fare_nonnegative_781981e5\"",
+        "sql": "ALTER TABLE \"public\".\"requests\" DROP CONSTRAINT \"request_estimated_fare_nonnegative_781981e5\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"request_estimated_fare_nonnegative_781981e5\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_estimated_fare_nonnegative_781981e5",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.pools.pool_capacity_not_exceeded_cf887d49",
+    "label": "Add check constraint \"pool_capacity_not_exceeded_cf887d49\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "pool_capacity_not_exceeded_cf887d49",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"pool_capacity_not_exceeded_cf887d49\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_capacity_not_exceeded_cf887d49",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"pool_capacity_not_exceeded_cf887d49\"",
+        "sql": "ALTER TABLE \"public\".\"pools\" ADD CONSTRAINT \"pool_capacity_not_exceeded_cf887d49\" CHECK (\"occupiedSeats\" <= capacity)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"pool_capacity_not_exceeded_cf887d49\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_capacity_not_exceeded_cf887d49",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.requests.request_estimated_fare_valid_07cb93ae",
+    "label": "Add check constraint \"request_estimated_fare_valid_07cb93ae\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "request_estimated_fare_valid_07cb93ae",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"request_estimated_fare_valid_07cb93ae\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_estimated_fare_valid_07cb93ae",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"request_estimated_fare_valid_07cb93ae\"",
+        "sql": "ALTER TABLE \"public\".\"requests\" ADD CONSTRAINT \"request_estimated_fare_valid_07cb93ae\" CHECK (\"estimatedFare\" >= 0 AND \"estimatedFare\" = round(\"estimatedFare\", 2))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"request_estimated_fare_valid_07cb93ae\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_estimated_fare_valid_07cb93ae",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.requests.request_quoted_fare_valid_55f10deb",
+    "label": "Add check constraint \"request_quoted_fare_valid_55f10deb\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "request_quoted_fare_valid_55f10deb",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"request_quoted_fare_valid_55f10deb\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_quoted_fare_valid_55f10deb",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"request_quoted_fare_valid_55f10deb\"",
+        "sql": "ALTER TABLE \"public\".\"requests\" ADD CONSTRAINT \"request_quoted_fare_valid_55f10deb\" CHECK (\"quotedFare\" >= 0 AND \"quotedFare\" = round(\"quotedFare\", 2))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"request_quoted_fare_valid_55f10deb\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "request_quoted_fare_valid_55f10deb",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ]
+  }
+]
