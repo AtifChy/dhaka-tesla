@@ -1,5 +1,7 @@
 # Dhaka Tesla Pool
 
+Live demo: [https://dhaka-tesla-tau.vercel.app/](https://dhaka-tesla-tau.vercel.app/)
+
 A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose. The frontend foundation uses Next.js 16, React 19, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
 
 Backend and frontend status: implemented and verified. The browser app includes persisted Zustand authentication, passenger/driver registration, passenger request/cancel/history flows, and driver availability/request/pool lifecycle flows with loading, error, and empty states.
@@ -267,8 +269,3 @@ OpenAI Codex was used to analyze the assignment, recover and maintain the implem
 Material accepted suggestions include atomic conditional seat allocation, a database capacity check, exact Decimal BDT storage with integer-poysha calculations, database-backed JWT user validation, and a real final-seat race test. Material suggestions changed or rejected include replacing simple integer IDs with UUIDs, storing money only as an integer column, adding revocable session infrastructure outside this MVP, and merging unfinished work directly to pre-release. Every accepted change was reviewed and verified with relevant type checks, tests, builds, database checks, or Docker smoke tests.
 
 The detailed record is in `docs/implementation-guide/ai-usage-log.md`. Do not present AI output as unreviewed original work; be prepared to explain and modify every submitted line. No secrets or real customer data should be entered into AI tools.
-
-## Remaining assignment work
-
-- Capture screenshots/architecture assets as required by the final submission.
-- Perform the pre-release acceptance pass, create `release/v1.0.0`, deploy publicly if a suitable free tier is available, and record the six-minute demo video.
