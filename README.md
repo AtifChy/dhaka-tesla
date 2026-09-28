@@ -161,7 +161,7 @@ Compose starts:
 2. A one-shot `migrate` container that applies Prisma 8 migrations and seeds the story cast.
 3. The API, which starts only after migration success and must pass `/api/v1/health`.
 
-Override `JWT_ACCESS_SECRET`, `CORS_ORIGIN`, or host `API_PORT` in `.env`. The fallback Compose secret is for local evaluation only.
+Override `JWT_ACCESS_SECRET`, `CORS_ORIGIN`, host `API_PORT`, or host `POSTGRES_PORT` in `.env`. If local development commands connect through a non-default PostgreSQL port, update the port in `DATABASE_URL` too. The fallback Compose secret is for local evaluation only.
 
 Stop containers without deleting database data:
 

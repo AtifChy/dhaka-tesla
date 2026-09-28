@@ -50,7 +50,7 @@ services:
       POSTGRES_USER: dhaka_tesla
       POSTGRES_PASSWORD: dhaka_tesla_dev
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - dhaka_tesla_postgres_data:/var/lib/postgresql
     healthcheck:
