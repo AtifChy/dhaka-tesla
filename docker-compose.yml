@@ -12,10 +12,53 @@ services:
     volumes:
       - dhaka_tesla_postgres_data:/var/lib/postgresql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U dhaka_tesla -d dhaka_tesla" ]
+      test: ["CMD-SHELL", "pg_isready -U dhaka_tesla -d dhaka_tesla"]
       interval: 5s
       timeout: 3s
       retries: 10
+
+  migrate:
+    build:
+      context: .
+    image: dhaka-tesla-pool-api:local
+    command: ["sh", "-c", "bun run migrate && bun run db:seed"]
+    environment: &api-environment
+      NODE_ENV: production
+      DATABASE_URL: postgresql://dhaka_tesla:dhaka_tesla_dev@postgres:5432/dhaka_tesla
+      PORT: 3000
+      HOST: 0.0.0.0
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-development-only-change-this-secret-1234}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+    image: dhaka-tesla-pool-api:local
+    environment: *api-environment
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "const response = await fetch('http://127.0.0.1:3000/api/v1/health'); if (!response.ok) process.exit(1);",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
 
 volumes:
   dhaka_tesla_postgres_data:
