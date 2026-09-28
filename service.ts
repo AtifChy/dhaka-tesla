@@ -1,6 +1,6 @@
-import node from "@prisma/composer/node";
 import { compute } from "@prisma/composer-prisma-cloud";
 import { postgres } from "@prisma/composer-prisma-cloud/orm";
+import node from "@prisma/composer/node";
 
 import { appContract } from "./src/prisma/composer.ts";
 
