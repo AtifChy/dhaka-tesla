@@ -9,6 +9,7 @@ The backend uses `@nestjs/platform-fastify`, `nestjs-zod`, Passport JWT, Argon2,
 ```dotenv
 NODE_ENV="development"
 DATABASE_URL="postgresql://dhaka_tesla:dhaka_tesla_dev@localhost:5432/dhaka_tesla"
+POSTGRES_PORT=5432
 PORT=3000
 HOST="localhost"
 JWT_ACCESS_SECRET="replace-with-at-least-32-random-characters"
