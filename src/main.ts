@@ -6,12 +6,18 @@ import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
-  const rawPort = (process.env.PORT ?? "").trim();
-  const parsedPort = rawPort.length > 0 ? Number(rawPort) : Number.NaN;
-  const port =
-    Number.isFinite(parsedPort) && parsedPort >= 0 && parsedPort <= 65535 ? parsedPort : 3000;
-  await app.listen(port);
-  console.log(`Server running at http://localhost:${port}`);
+  const port = Number(process.env.PORT ?? 3000);
+  const host = process.env.HOST ?? "localhost";
+
+  app.enableShutdownHooks();
+  app.setGlobalPrefix("api/v1");
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+    credentials: false,
+  });
+
+  await app.listen(port, host);
+  console.log(`Server running at http://${host}:${port}/api/v1`);
 }
 
 bootstrap().catch((error) => {

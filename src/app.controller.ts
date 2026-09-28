@@ -1,11 +1,15 @@
 import { Controller, Get } from "@nestjs/common";
 
+import { Public } from "./common/auth/public.decorator";
+
 @Controller()
 export class AppController {
-  @Get()
-  getRoot() {
+  @Public()
+  @Get("health")
+  health() {
     return {
-      message: "hello from create-prisma + nest",
+      status: "ok",
+      timestamp: new Date().toISOString(),
     };
   }
 }
