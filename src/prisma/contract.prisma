@@ -70,7 +70,8 @@ model Request {
 
   @@check(expression: "\"distanceMeters\" > 0", name: "request_distance_positive")
   @@check(expression: "\"seatsRequested\" > 0", name: "request_seats_positive")
-  @@check(expression: "\"estimatedFare\" >= 0", name: "request_estimated_fare_nonnegative")
+  @@check(expression: "\"estimatedFare\" >= 0 AND \"estimatedFare\" = round(\"estimatedFare\", 2)", name: "request_estimated_fare_valid")
+  @@check(expression: "\"quotedFare\" >= 0 AND \"quotedFare\" = round(\"quotedFare\", 2)", name: "request_quoted_fare_valid")
   @@index([passengerId, createdAt])
   @@index([status, pickupZone, corridor, createdAt])
   @@map("requests")
@@ -94,6 +95,7 @@ model Pool {
 
   @@check(expression: "capacity > 0", name: "pool_capacity_positive")
   @@check(expression: "\"occupiedSeats\" >= 0", name: "pool_occupied_seats_nonnegative")
+  @@check(expression: "\"occupiedSeats\" <= capacity", name: "pool_capacity_not_exceeded")
   @@index([driverId, status])
   @@index([vehicleId, status])
   @@index([pickupZone, corridor, status])

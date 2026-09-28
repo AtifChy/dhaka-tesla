@@ -1307,6 +1307,11 @@
             "pools": {
               "checks": [
                 {
+                  "expression": "\"occupiedSeats\" <= capacity",
+                  "name": "pool_capacity_not_exceeded_cf887d49",
+                  "prefix": "pool_capacity_not_exceeded"
+                },
+                {
                   "expression": "capacity > 0",
                   "name": "pool_capacity_positive_2e07dccc",
                   "prefix": "pool_capacity_positive"
@@ -1493,9 +1498,14 @@
                   "prefix": "request_distance_positive"
                 },
                 {
-                  "expression": "\"estimatedFare\" >= 0",
-                  "name": "request_estimated_fare_nonnegative_781981e5",
-                  "prefix": "request_estimated_fare_nonnegative"
+                  "expression": "\"estimatedFare\" >= 0 AND \"estimatedFare\" = round(\"estimatedFare\", 2)",
+                  "name": "request_estimated_fare_valid_07cb93ae",
+                  "prefix": "request_estimated_fare_valid"
+                },
+                {
+                  "expression": "\"quotedFare\" >= 0 AND \"quotedFare\" = round(\"quotedFare\", 2)",
+                  "name": "request_quoted_fare_valid_55f10deb",
+                  "prefix": "request_quoted_fare_valid"
                 },
                 {
                   "expression": "\"seatsRequested\" > 0",
@@ -1866,7 +1876,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2cff04a346370152eba83ff05e0272405893eebc4217cb7aebfc953df320a737"
+    "storageHash": "7f2bec48f98e75de0632ab253abd2209a7beac48cfeea429276f50330f6a4284"
   },
   "execution": {
     "executionHash": "d8f81fe02a1ff55cf0d55f9dcb9d096ad62a18f8feafb2bca547a15a44d27d04",
