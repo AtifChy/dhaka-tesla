@@ -9,12 +9,14 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { RolesGuard } from "./common/auth/roles.guard";
 import { validateEnv } from "./config/env";
 import { PrismaModule } from "./prisma.module";
+import { RidesModule } from "./rides/rides.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnv }),
     PrismaModule,
     AuthModule,
+    RidesModule,
   ],
   controllers: [AppController],
   providers: [
