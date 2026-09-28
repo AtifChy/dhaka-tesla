@@ -1,12 +1,7 @@
 .git
 .gitignore
-.env
-.alchemy
-.prisma-composer
-coverage
-dist
-docs
+.next
+.env*
 node_modules
-web
 npm-debug.log*
 bun-error.log*

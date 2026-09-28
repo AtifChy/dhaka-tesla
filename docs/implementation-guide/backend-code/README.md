@@ -30,6 +30,7 @@ Do not copy only one middle chapter. Later chapters import files defined earlier
 | Method | Route                                       | Role            | Purpose                                             |
 | ------ | ------------------------------------------- | --------------- | --------------------------------------------------- |
 | `POST` | `/api/v1/auth/register`                     | Public          | Register a passenger                                |
+| `POST` | `/api/v1/auth/register/driver`              | Public          | Register a driver and vehicle                       |
 | `POST` | `/api/v1/auth/login`                        | Public          | Obtain a 15-minute JWT                              |
 | `GET`  | `/api/v1/auth/me`                           | Authenticated   | Read the database-validated current identity        |
 | `GET`  | `/api/v1/health`                            | Public          | Container health probe                              |

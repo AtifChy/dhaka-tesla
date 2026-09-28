@@ -13,7 +13,7 @@ POSTGRES_PORT=5432
 PORT=3000
 HOST="localhost"
 JWT_ACCESS_SECRET="replace-with-at-least-32-random-characters"
-CORS_ORIGIN="http://localhost:5173"
+CORS_ORIGIN="http://localhost:3001"
 API_PORT=3000
 ```
 
@@ -28,7 +28,7 @@ const envSchema = z.object({
   HOST: z.string().default("localhost"),
   DATABASE_URL: z.url(),
   JWT_ACCESS_SECRET: z.string().min(32).max(128),
-  CORS_ORIGIN: z.url().default("http://localhost:5173"),
+  CORS_ORIGIN: z.url().default("http://localhost:3001"),
 });
 
 export type Env = z.infer<typeof envSchema>;

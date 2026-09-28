@@ -13,7 +13,7 @@ The implementation uses stateless 15-minute access tokens. Passport verifies sig
 
 ## `src/auth/dto/register.dto.ts`
 
-Public registration cannot choose a role. Every public registration becomes `PASSENGER`; the seeded Jashim account supplies the assignment driver.
+Registration uses separate commands instead of trusting an arbitrary role string. `/auth/register` always creates a passenger. `/auth/register/driver` requires vehicle details and creates the driver plus their initially offline vehicle in one transaction.
 
 ```ts
 import { createZodDto } from "nestjs-zod";
@@ -25,7 +25,13 @@ const registerSchema = z.object({
   password: z.string().min(10).max(128),
 });
 
+const registerDriverSchema = registerSchema.extend({
+  vehicleName: z.string().trim().min(2).max(80),
+  vehicleCapacity: z.number().int().min(1).max(6),
+});
+
 export class RegisterDto extends createZodDto(registerSchema) {}
+export class RegisterDriverDto extends createZodDto(registerDriverSchema) {}
 ```
 
 ## `src/auth/jwt-payload.ts`
@@ -99,7 +105,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 This deliberately does not add a `Session` table. The assignment requires authentication and authorization, not refresh tokens, multi-device sessions, or immediate server-side revocation. Add stateful sessions only if those requirements are introduced.
 
-## Registration rule in `src/auth/auth.service.ts`
+## Registration rules in `src/auth/auth.service.ts`
 
 ```ts
 const user = await this.prisma.db.orm.public.User.select("id", "name", "email", "role").create({
@@ -110,14 +116,39 @@ const user = await this.prisma.db.orm.public.User.select("id", "name", "email", 
 });
 ```
 
+Driver registration keeps the user and required vehicle consistent:
+
+```ts
+const user = await this.prisma.db.transaction(async (transaction) => {
+  const created = await transaction.orm.public.User.select("id", "name", "email", "role").create({
+    name: input.name,
+    email: input.email,
+    passwordHash,
+    role: "DRIVER",
+  });
+
+  await transaction.orm.public.Vehicle.create({
+    driverId: created.id,
+    name: input.vehicleName,
+    capacity: input.vehicleCapacity,
+    isOnline: false,
+  });
+
+  return created;
+});
+```
+
+This demo allows public driver signup so the evaluator can exercise both roles without database access. A production service would normally add driver/vehicle verification before activation.
+
 Login always returns the same generic `Invalid email or password` response for missing users and bad passwords, avoiding account enumeration.
 
 ## Routes
 
 ```text
-POST /api/v1/auth/register  public, creates PASSENGER
-POST /api/v1/auth/login     public, returns bearer token
-GET  /api/v1/auth/me        authenticated, returns current token identity
+POST /api/v1/auth/register         public, creates PASSENGER
+POST /api/v1/auth/register/driver  public, creates DRIVER + Vehicle
+POST /api/v1/auth/login            public, returns bearer token
+GET  /api/v1/auth/me               authenticated, returns current token identity
 ```
 
 Swagger marks only `/auth/me` with bearer authentication; public endpoints remain unlocked in the API document.

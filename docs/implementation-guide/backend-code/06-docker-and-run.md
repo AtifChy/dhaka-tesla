@@ -70,7 +70,7 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-development-only-change-this-secret-1234}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
     depends_on:
       postgres:
         condition: service_healthy

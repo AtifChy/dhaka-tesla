@@ -1,8 +1,8 @@
 # Dhaka Tesla Pool
 
-A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose.
+A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose. The frontend foundation uses Next.js 16, React 19, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
 
-Backend status: implemented and verified. The Next.js frontend is the next milestone and is intentionally not represented here as complete.
+Backend and frontend status: implemented and verified. The browser app includes persisted Zustand authentication, passenger/driver registration, passenger request/cancel/history flows, and driver availability/request/pool lifecycle flows with loading, error, and empty states.
 
 ## Why REST
 
@@ -12,7 +12,7 @@ REST is a better fit than GraphQL for this MVP because the system has a small se
 
 ```mermaid
 flowchart LR
-  Browser[Next.js frontend - pending] -->|JSON over HTTPS| API[NestJS + Fastify REST API]
+  Browser[Next.js frontend] -->|same-origin /api/v1 proxy| API[NestJS + Fastify REST API]
   Swagger[Swagger evaluator] --> API
   API --> Auth[Passport JWT + role guards]
   API --> Domain[Fares + transitions + capacity rules]
@@ -95,7 +95,8 @@ Swagger UI: `http://localhost:3000/docs`
 | Method | Route                                | Access          | Purpose                                                            |
 | ------ | ------------------------------------ | --------------- | ------------------------------------------------------------------ |
 | `GET`  | `/health`                            | Public          | Health check.                                                      |
-| `POST` | `/auth/register`                     | Public          | Register a passenger. Public registration cannot create drivers.   |
+| `POST` | `/auth/register`                     | Public          | Register a passenger.                                              |
+| `POST` | `/auth/register/driver`              | Public          | Atomically register a driver and their initially offline vehicle.  |
 | `POST` | `/auth/login`                        | Public          | Return a 15-minute bearer token.                                   |
 | `GET`  | `/auth/me`                           | Authenticated   | Return validated token identity after a fresh database user check. |
 | `GET`  | `/rides/options`                     | Passenger       | List fixed route choices and quotes.                               |
@@ -143,7 +144,7 @@ All demo users use password `superstrongpassword`.
 
 The seed is idempotent: rerunning it updates the story cast instead of creating duplicates.
 
-## Run the complete backend with Docker
+## Run the complete app with Docker
 
 Prerequisite: Docker Desktop with Compose.
 
@@ -160,6 +161,9 @@ Compose starts:
 1. PostgreSQL and waits for `pg_isready`.
 2. A one-shot `migrate` container that applies Prisma 8 migrations and seeds the story cast.
 3. The API, which starts only after migration success and must pass `/api/v1/health`.
+4. The standalone Next.js frontend, which starts after API health and must pass its own health check.
+
+Open the frontend at `http://localhost:3001`, Swagger at `http://localhost:3000/docs`, and the API at `http://localhost:3000/api/v1`.
 
 Override `JWT_ACCESS_SECRET`, `CORS_ORIGIN`, host `API_PORT`, or host `POSTGRES_PORT` in `.env`. If local development commands connect through a non-default PostgreSQL port, update the port in `DATABASE_URL` too. The fallback Compose secret is for local evaluation only.
 
@@ -184,6 +188,16 @@ bun --env-file=.env run db:seed
 bun --env-file=.env run dev
 ```
 
+In a second terminal:
+
+```bash
+cd web
+bun install
+bun run dev
+```
+
+The frontend runs on `http://localhost:3001` and proxies `/api/v1` to the backend, avoiding browser CORS coupling during local development.
+
 Useful database commands:
 
 ```bash
@@ -199,6 +213,7 @@ bun run typecheck
 bun run test
 bun --env-file=.env run test:integration
 bun run build
+cd web && bun run format:check && bun run lint && bun run typecheck && bun run build
 docker compose config
 docker compose up --build --wait
 ```
@@ -210,6 +225,7 @@ Verified backend results on 2026-09-28:
 - Prisma reports contract/migration storage hash `7f2bec48f98e75de0632ab253abd2209a7beac48cfeea429276f50330f6a4284` as current.
 - Docker migration/seed exits `0`; PostgreSQL and API health checks pass.
 - Nusrat login, authenticated identity, Swagger, fare quotes, pooling, lifecycle completion, and late-cancel rejection were smoke-tested.
+- The Next.js production/standalone build passes; same-origin API proxying and seeded passenger/driver dashboards were browser-tested.
 
 ## Project layout
 
@@ -225,6 +241,7 @@ test/                   database concurrency integration test
 migrations/             committed Prisma 8 migrations and snapshots
 docs/implementation-guide/
                         step-by-step implementation and AI log
+web/                    Next.js and shadcn/ui frontend
 Dockerfile
 docker-compose.yml
 ```
@@ -241,7 +258,7 @@ Completed, tested feature branches are merged into `master` with merge commits. 
 
 ## Deployment
 
-No paid service is required. A public deployment has not been created yet because suitable always-free backend/database availability can change and the frontend is unfinished. The Docker setup is the reproducible deployment fallback: any free VM/container host that supports Docker Compose can run the same stack. If a public host is selected later, use only a confirmed free tier, supply secrets through the host, run migrations before API startup, and point the frontend at the public API URL.
+No paid service is required. A public deployment has not been created yet because suitable always-free backend/database availability can change. The Docker setup is the reproducible deployment fallback: any free VM/container host that supports Docker Compose can run the same stack. If a public host is selected later, use only a confirmed free tier, supply secrets through the host, run migrations before API startup, and configure the frontend proxy for the public API service.
 
 ## AI usage disclosure
 
@@ -253,7 +270,5 @@ The detailed record is in `docs/implementation-guide/ai-usage-log.md`. Do not pr
 
 ## Remaining assignment work
 
-- Implement the Next.js passenger/driver interface with loading, error, empty, pending, and terminal states.
-- Add the `web` container to Compose and test the complete browser flow.
 - Capture screenshots/architecture assets as required by the final submission.
 - Perform the pre-release acceptance pass, create `release/v1.0.0`, deploy publicly if a suitable free tier is available, and record the six-minute demo video.
