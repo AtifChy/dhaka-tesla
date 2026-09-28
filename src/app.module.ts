@@ -1,12 +1,13 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
 import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod";
 
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { RolesGuard } from "./common/auth/roles.guard";
+import { ApiExceptionFilter } from "./common/errors/api-exception.filter";
 import { validateEnv } from "./config/env";
 import { DriverModule } from "./driver/driver.module";
 import { PrismaModule } from "./prisma.module";
@@ -26,6 +27,7 @@ import { RidesModule } from "./rides/rides.module";
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_FILTER, useClass: ApiExceptionFilter },
   ],
 })
 export class AppModule {}

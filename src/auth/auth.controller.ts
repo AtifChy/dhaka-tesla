@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ZodSerializerDto } from "nestjs-zod";
 
 import type { AuthUser } from "../common/auth/auth-user";
@@ -9,6 +10,7 @@ import { AuthResponseDto, AuthUserResponseDto } from "./dto/auth-response.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
+@ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
@@ -28,6 +30,7 @@ export class AuthController {
     return this.auth.login(input);
   }
 
+  @ApiBearerAuth()
   @Get("me")
   @ZodSerializerDto(AuthUserResponseDto)
   me(@CurrentUser() user: AuthUser): AuthUserResponseDto {
