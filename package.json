@@ -30,8 +30,8 @@
     "test:coverage": "vitest run --coverage",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "lint": "oxlint src/ text/",
-    "lint:fix": "oxlint src/ text/ --fix"
+    "lint": "oxlint src/ scripts/ test/ *.ts",
+    "lint:fix": "oxlint src/ scripts/ test/ *.ts --fix"
   },
   "dependencies": {
     "@fastify/helmet": "^13.1.1",
