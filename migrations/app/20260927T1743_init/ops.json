@@ -1,0 +1,1342 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.events",
+    "label": "Create table \"events\"",
+    "summary": "Creates table \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"events\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"events\"",
+        "sql": "CREATE TABLE \"public\".\"events\" (\n  \"actorId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"fromStatus\" text,\n  \"id\" SERIAL NOT NULL,\n  \"metadata\" json,\n  \"poolId\" int4,\n  \"requestId\" int4,\n  \"toStatus\" text,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"events_fromStatus_check_85acb04b\" CHECK (\"fromStatus\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED')),\n  CONSTRAINT \"events_toStatus_check_5a2c3e11\" CHECK (\"toStatus\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"events\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.pool_members",
+    "label": "Create table \"pool_members\"",
+    "summary": "Creates table \"pool_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "pool_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"pool_members\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"pool_members\"",
+        "sql": "CREATE TABLE \"public\".\"pool_members\" (\n  \"fare\" numeric NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"joinedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"poolId\" int4 NOT NULL,\n  \"requestId\" int4 NOT NULL,\n  \"seats\" int4 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"pool_member_fare_nonnegative_4800a89c\" CHECK (fare >= 0),\n  CONSTRAINT \"pool_member_seats_positive_de035958\" CHECK (seats > 0)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"pool_members\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.pools",
+    "label": "Create table \"pools\"",
+    "summary": "Creates table \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"pools\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"pools\"",
+        "sql": "CREATE TABLE \"public\".\"pools\" (\n  \"capacity\" int4 NOT NULL,\n  \"corridor\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"driverId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"occupiedSeats\" int4 DEFAULT 0 NOT NULL,\n  \"pickupZone\" text NOT NULL,\n  \"status\" text DEFAULT 'MATCHED' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"vehicleId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"pool_capacity_positive_2e07dccc\" CHECK (capacity > 0),\n  CONSTRAINT \"pool_occupied_seats_nonnegative_c3fcf762\" CHECK (\"occupiedSeats\" >= 0),\n  CONSTRAINT \"pools_status_check_0b631e14\" CHECK (\"status\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"pools\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.requests",
+    "label": "Create table \"requests\"",
+    "summary": "Creates table \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"requests\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"requests\"",
+        "sql": "CREATE TABLE \"public\".\"requests\" (\n  \"corridor\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"destinationZone\" text NOT NULL,\n  \"distanceMeters\" int4 NOT NULL,\n  \"estimatedFare\" numeric NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"passengerId\" int4 NOT NULL,\n  \"paymentMethod\" text NOT NULL,\n  \"pickupZone\" text NOT NULL,\n  \"quotedFare\" numeric NOT NULL,\n  \"seatsRequested\" int4 NOT NULL,\n  \"status\" text DEFAULT 'REQUESTED' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"request_distance_positive_c1cb0d59\" CHECK (\"distanceMeters\" > 0),\n  CONSTRAINT \"request_estimated_fare_nonnegative_781981e5\" CHECK (\"estimatedFare\" >= 0),\n  CONSTRAINT \"request_seats_positive_f4eebcb7\" CHECK (\"seatsRequested\" > 0),\n  CONSTRAINT \"requests_paymentMethod_check_27e4f1ac\" CHECK (\"paymentMethod\" IN ('CASH', 'TESLAPAY')),\n  CONSTRAINT \"requests_status_check_0b631e14\" CHECK (\"status\" IN ('REQUESTED', 'MATCHED', 'DRIVER_ARRIVED', 'STARTED', 'COMPLETED', 'CANCELED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"requests\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.users",
+    "label": "Create table \"users\"",
+    "summary": "Creates table \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"users\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"users\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"users\"",
+        "sql": "CREATE TABLE \"public\".\"users\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"passwordHash\" text NOT NULL,\n  \"role\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"users_role_check_2c4ac87b\" CHECK (\"role\" IN ('PASSENGER', 'DRIVER'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"users\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"users\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.vehicles",
+    "label": "Create table \"vehicles\"",
+    "summary": "Creates table \"vehicles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "vehicles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"vehicles\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"vehicles\"",
+        "sql": "CREATE TABLE \"public\".\"vehicles\" (\n  \"capacity\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"driverId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"isOnline\" bool DEFAULT false NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"vehicle_capacity_positive_2e07dccc\" CHECK (capacity > 0)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"vehicles\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.pool_members.pool_members_requestId_key",
+    "label": "Add unique constraint on \"pool_members\" (requestId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "pool_members_requestId_key",
+        "table": "pool_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"pool_members_requestId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_requestId_key",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"pool_members_requestId_key\"",
+        "sql": "ALTER TABLE \"public\".\"pool_members\" ADD CONSTRAINT \"pool_members_requestId_key\" UNIQUE (\"requestId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"pool_members_requestId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_requestId_key",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.users.users_email_key",
+    "label": "Add unique constraint on \"users\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "users_email_key",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"users_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "users_email_key",
+          "public",
+          "\"public\".\"users\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"users_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD CONSTRAINT \"users_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"users_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "users_email_key",
+          "public",
+          "\"public\".\"users\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.vehicles.vehicles_driverId_key",
+    "label": "Add unique constraint on \"vehicles\" (driverId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "vehicles_driverId_key",
+        "table": "vehicles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"vehicles_driverId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "vehicles_driverId_key",
+          "public",
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"vehicles_driverId_key\"",
+        "sql": "ALTER TABLE \"public\".\"vehicles\" ADD CONSTRAINT \"vehicles_driverId_key\" UNIQUE (\"driverId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"vehicles_driverId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "vehicles_driverId_key",
+          "public",
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.events.events_actorId_idx_a58f6b4b",
+    "label": "Create index \"events_actorId_idx_a58f6b4b\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "events_actorId_idx_a58f6b4b",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"events_actorId_idx_a58f6b4b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_actorId_idx_a58f6b4b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"events_actorId_idx_a58f6b4b\"",
+        "sql": "CREATE INDEX \"events_actorId_idx_a58f6b4b\" ON \"public\".\"events\" (\"actorId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"events_actorId_idx_a58f6b4b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_actorId_idx_a58f6b4b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.events.events_poolId_createdAt_idx_416a0221",
+    "label": "Create index \"events_poolId_createdAt_idx_416a0221\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "events_poolId_createdAt_idx_416a0221",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"events_poolId_createdAt_idx_416a0221\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_poolId_createdAt_idx_416a0221\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"events_poolId_createdAt_idx_416a0221\"",
+        "sql": "CREATE INDEX \"events_poolId_createdAt_idx_416a0221\" ON \"public\".\"events\" (\"poolId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"events_poolId_createdAt_idx_416a0221\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_poolId_createdAt_idx_416a0221\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.events.events_poolId_idx_d8a048f6",
+    "label": "Create index \"events_poolId_idx_d8a048f6\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "events_poolId_idx_d8a048f6",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"events_poolId_idx_d8a048f6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_poolId_idx_d8a048f6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"events_poolId_idx_d8a048f6\"",
+        "sql": "CREATE INDEX \"events_poolId_idx_d8a048f6\" ON \"public\".\"events\" (\"poolId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"events_poolId_idx_d8a048f6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_poolId_idx_d8a048f6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.events.events_requestId_createdAt_idx_91651cde",
+    "label": "Create index \"events_requestId_createdAt_idx_91651cde\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "events_requestId_createdAt_idx_91651cde",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"events_requestId_createdAt_idx_91651cde\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_requestId_createdAt_idx_91651cde\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"events_requestId_createdAt_idx_91651cde\"",
+        "sql": "CREATE INDEX \"events_requestId_createdAt_idx_91651cde\" ON \"public\".\"events\" (\"requestId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"events_requestId_createdAt_idx_91651cde\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_requestId_createdAt_idx_91651cde\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.events.events_requestId_idx_fd667f92",
+    "label": "Create index \"events_requestId_idx_fd667f92\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "events_requestId_idx_fd667f92",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"events_requestId_idx_fd667f92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_requestId_idx_fd667f92\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"events_requestId_idx_fd667f92\"",
+        "sql": "CREATE INDEX \"events_requestId_idx_fd667f92\" ON \"public\".\"events\" (\"requestId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"events_requestId_idx_fd667f92\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"events_requestId_idx_fd667f92\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pool_members.pool_members_poolId_idx_d8a048f6",
+    "label": "Create index \"pool_members_poolId_idx_d8a048f6\" on \"pool_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pool_members_poolId_idx_d8a048f6",
+        "table": "pool_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pool_members_poolId_idx_d8a048f6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pool_members_poolId_idx_d8a048f6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pool_members_poolId_idx_d8a048f6\"",
+        "sql": "CREATE INDEX \"pool_members_poolId_idx_d8a048f6\" ON \"public\".\"pool_members\" (\"poolId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pool_members_poolId_idx_d8a048f6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pool_members_poolId_idx_d8a048f6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pools.pools_driverId_idx_8eed3317",
+    "label": "Create index \"pools_driverId_idx_8eed3317\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pools_driverId_idx_8eed3317",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pools_driverId_idx_8eed3317\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_driverId_idx_8eed3317\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pools_driverId_idx_8eed3317\"",
+        "sql": "CREATE INDEX \"pools_driverId_idx_8eed3317\" ON \"public\".\"pools\" (\"driverId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pools_driverId_idx_8eed3317\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_driverId_idx_8eed3317\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pools.pools_driverId_status_idx_f6ee19e1",
+    "label": "Create index \"pools_driverId_status_idx_f6ee19e1\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pools_driverId_status_idx_f6ee19e1",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pools_driverId_status_idx_f6ee19e1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_driverId_status_idx_f6ee19e1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pools_driverId_status_idx_f6ee19e1\"",
+        "sql": "CREATE INDEX \"pools_driverId_status_idx_f6ee19e1\" ON \"public\".\"pools\" (\"driverId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pools_driverId_status_idx_f6ee19e1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_driverId_status_idx_f6ee19e1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pools.pools_pickupZone_corridor_status_idx_60ef5a1d",
+    "label": "Create index \"pools_pickupZone_corridor_status_idx_60ef5a1d\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pools_pickupZone_corridor_status_idx_60ef5a1d",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pools_pickupZone_corridor_status_idx_60ef5a1d\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_pickupZone_corridor_status_idx_60ef5a1d\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pools_pickupZone_corridor_status_idx_60ef5a1d\"",
+        "sql": "CREATE INDEX \"pools_pickupZone_corridor_status_idx_60ef5a1d\" ON \"public\".\"pools\" (\"pickupZone\", \"corridor\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pools_pickupZone_corridor_status_idx_60ef5a1d\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_pickupZone_corridor_status_idx_60ef5a1d\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pools.pools_vehicleId_idx_e2df58fc",
+    "label": "Create index \"pools_vehicleId_idx_e2df58fc\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pools_vehicleId_idx_e2df58fc",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pools_vehicleId_idx_e2df58fc\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_vehicleId_idx_e2df58fc\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pools_vehicleId_idx_e2df58fc\"",
+        "sql": "CREATE INDEX \"pools_vehicleId_idx_e2df58fc\" ON \"public\".\"pools\" (\"vehicleId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pools_vehicleId_idx_e2df58fc\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_vehicleId_idx_e2df58fc\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.pools.pools_vehicleId_status_idx_a4d785a6",
+    "label": "Create index \"pools_vehicleId_status_idx_a4d785a6\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "pools_vehicleId_status_idx_a4d785a6",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"pools_vehicleId_status_idx_a4d785a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_vehicleId_status_idx_a4d785a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"pools_vehicleId_status_idx_a4d785a6\"",
+        "sql": "CREATE INDEX \"pools_vehicleId_status_idx_a4d785a6\" ON \"public\".\"pools\" (\"vehicleId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"pools_vehicleId_status_idx_a4d785a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"pools_vehicleId_status_idx_a4d785a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.requests.requests_passengerId_createdAt_idx_bb7810ca",
+    "label": "Create index \"requests_passengerId_createdAt_idx_bb7810ca\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "requests_passengerId_createdAt_idx_bb7810ca",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"requests_passengerId_createdAt_idx_bb7810ca\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_passengerId_createdAt_idx_bb7810ca\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"requests_passengerId_createdAt_idx_bb7810ca\"",
+        "sql": "CREATE INDEX \"requests_passengerId_createdAt_idx_bb7810ca\" ON \"public\".\"requests\" (\"passengerId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"requests_passengerId_createdAt_idx_bb7810ca\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_passengerId_createdAt_idx_bb7810ca\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.requests.requests_passengerId_idx_21958ace",
+    "label": "Create index \"requests_passengerId_idx_21958ace\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "requests_passengerId_idx_21958ace",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"requests_passengerId_idx_21958ace\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_passengerId_idx_21958ace\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"requests_passengerId_idx_21958ace\"",
+        "sql": "CREATE INDEX \"requests_passengerId_idx_21958ace\" ON \"public\".\"requests\" (\"passengerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"requests_passengerId_idx_21958ace\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_passengerId_idx_21958ace\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.requests.requests_status_pickupZone_corridor_createdAt_idx_17be15f9",
+    "label": "Create index \"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "requests_status_pickupZone_corridor_createdAt_idx_17be15f9",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\"",
+        "sql": "CREATE INDEX \"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\" ON \"public\".\"requests\" (\"status\", \"pickupZone\", \"corridor\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"requests_status_pickupZone_corridor_createdAt_idx_17be15f9\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.users.users_role_idx_2c1ddf83",
+    "label": "Create index \"users_role_idx_2c1ddf83\" on \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "users_role_idx_2c1ddf83",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"users_role_idx_2c1ddf83\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"users_role_idx_2c1ddf83\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"users_role_idx_2c1ddf83\"",
+        "sql": "CREATE INDEX \"users_role_idx_2c1ddf83\" ON \"public\".\"users\" (\"role\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"users_role_idx_2c1ddf83\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"users_role_idx_2c1ddf83\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.events.events_requestId_fkey",
+    "label": "Add foreign key \"events_requestId_fkey\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "events_requestId_fkey",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"events_requestId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_requestId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"events_requestId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"events\"\nADD CONSTRAINT \"events_requestId_fkey\"\nFOREIGN KEY (\"requestId\")\nREFERENCES \"public\".\"requests\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"events_requestId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_requestId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.events.events_poolId_fkey",
+    "label": "Add foreign key \"events_poolId_fkey\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "events_poolId_fkey",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"events_poolId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_poolId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"events_poolId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"events\"\nADD CONSTRAINT \"events_poolId_fkey\"\nFOREIGN KEY (\"poolId\")\nREFERENCES \"public\".\"pools\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"events_poolId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_poolId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.events.events_actorId_fkey",
+    "label": "Add foreign key \"events_actorId_fkey\" on \"events\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "events_actorId_fkey",
+        "table": "events"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"events_actorId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_actorId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"events_actorId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"events\"\nADD CONSTRAINT \"events_actorId_fkey\"\nFOREIGN KEY (\"actorId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"events_actorId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "events_actorId_fkey",
+          "public",
+          "\"public\".\"events\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.pool_members.pool_members_poolId_fkey",
+    "label": "Add foreign key \"pool_members_poolId_fkey\" on \"pool_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "pool_members_poolId_fkey",
+        "table": "pool_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"pool_members_poolId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_poolId_fkey",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"pool_members_poolId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"pool_members\"\nADD CONSTRAINT \"pool_members_poolId_fkey\"\nFOREIGN KEY (\"poolId\")\nREFERENCES \"public\".\"pools\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"pool_members_poolId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_poolId_fkey",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.pool_members.pool_members_requestId_fkey",
+    "label": "Add foreign key \"pool_members_requestId_fkey\" on \"pool_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "pool_members_requestId_fkey",
+        "table": "pool_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"pool_members_requestId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_requestId_fkey",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"pool_members_requestId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"pool_members\"\nADD CONSTRAINT \"pool_members_requestId_fkey\"\nFOREIGN KEY (\"requestId\")\nREFERENCES \"public\".\"requests\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"pool_members_requestId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pool_members_requestId_fkey",
+          "public",
+          "\"public\".\"pool_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.pools.pools_driverId_fkey",
+    "label": "Add foreign key \"pools_driverId_fkey\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "pools_driverId_fkey",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"pools_driverId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pools_driverId_fkey",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"pools_driverId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"pools\"\nADD CONSTRAINT \"pools_driverId_fkey\"\nFOREIGN KEY (\"driverId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"pools_driverId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pools_driverId_fkey",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.pools.pools_vehicleId_fkey",
+    "label": "Add foreign key \"pools_vehicleId_fkey\" on \"pools\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "pools_vehicleId_fkey",
+        "table": "pools"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"pools_vehicleId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pools_vehicleId_fkey",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"pools_vehicleId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"pools\"\nADD CONSTRAINT \"pools_vehicleId_fkey\"\nFOREIGN KEY (\"vehicleId\")\nREFERENCES \"public\".\"vehicles\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"pools_vehicleId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "pools_vehicleId_fkey",
+          "public",
+          "\"public\".\"pools\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.requests.requests_passengerId_fkey",
+    "label": "Add foreign key \"requests_passengerId_fkey\" on \"requests\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "requests_passengerId_fkey",
+        "table": "requests"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"requests_passengerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "requests_passengerId_fkey",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"requests_passengerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"requests\"\nADD CONSTRAINT \"requests_passengerId_fkey\"\nFOREIGN KEY (\"passengerId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"requests_passengerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "requests_passengerId_fkey",
+          "public",
+          "\"public\".\"requests\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.vehicles.vehicles_driverId_fkey",
+    "label": "Add foreign key \"vehicles_driverId_fkey\" on \"vehicles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "vehicles_driverId_fkey",
+        "table": "vehicles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"vehicles_driverId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "vehicles_driverId_fkey",
+          "public",
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"vehicles_driverId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"vehicles\"\nADD CONSTRAINT \"vehicles_driverId_fkey\"\nFOREIGN KEY (\"driverId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"vehicles_driverId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "vehicles_driverId_fkey",
+          "public",
+          "\"public\".\"vehicles\""
+        ]
+      }
+    ]
+  }
+]

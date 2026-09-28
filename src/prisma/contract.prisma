@@ -1,21 +1,136 @@
 // use prisma-8
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum Role {
+  PASSENGER
+  DRIVER
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
+enum Status {
+  REQUESTED
+  MATCHED
+  DRIVER_ARRIVED
+  STARTED
+  COMPLETED
+  CANCELED
+}
+
+enum PaymentMethod {
+  CASH
+  TESLAPAY
+}
+
+model User {
+  id           Int                        @id @default(autoincrement())
+  name         String
+  email        String                     @unique
+  passwordHash String
+  role         Role
+  vehicle      Vehicle?
+  requests     Request[]
+  pools        Pool[]
+  events       Event[]
+  createdAt    TimestamptzString          @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  @@index([role])
+  @@map("users")
+}
+
+model Vehicle {
+  id        Int                        @id @default(autoincrement())
+  driverId  Int                        @unique
+  name      String
+  capacity  Int
+  isOnline  Boolean                    @default(false)
+  driver    User                       @relation(fields:[driverId], references:[id], onDelete: Restrict)
+  pools     Pool[]
+  createdAt TimestamptzString          @default(now())
   updatedAt temporal.updatedAtString()
+
+  @@check(expression: "capacity > 0", name: "vehicle_capacity_positive")
+  @@map("vehicles")
+}
+
+model Request {
+  id              Int                        @id @default(autoincrement())
+  passengerId     Int
+  passenger       User                       @relation(fields:[passengerId], references:[id], onDelete: Restrict)
+  pickupZone      String
+  destinationZone String
+  corridor        String
+  distanceMeters  Int
+  seatsRequested  Int
+  status          Status                     @default(REQUESTED)
+  estimatedFare   Decimal
+  quotedFare      Decimal
+  paymentMethod   PaymentMethod
+  membership      PoolMember?
+  events          Event[]
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  @@check(expression: "\"distanceMeters\" > 0", name: "request_distance_positive")
+  @@check(expression: "\"seatsRequested\" > 0", name: "request_seats_positive")
+  @@check(expression: "\"estimatedFare\" >= 0", name: "request_estimated_fare_nonnegative")
+  @@index([passengerId, createdAt])
+  @@index([status, pickupZone, corridor, createdAt])
+  @@map("requests")
+}
+
+model Pool {
+  id            Int                        @id @default(autoincrement())
+  driverId      Int
+  driver        User                       @relation(fields:[driverId], references:[id], onDelete: Restrict)
+  vehicleId     Int
+  vehicle       Vehicle                    @relation(fields:[vehicleId], references:[id], onDelete: Restrict)
+  status        Status                     @default(MATCHED)
+  pickupZone    String
+  corridor      String
+  capacity      Int
+  occupiedSeats Int                        @default(0)
+  members       PoolMember[]
+  events        Event[]
+  createdAt     TimestamptzString          @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  @@check(expression: "capacity > 0", name: "pool_capacity_positive")
+  @@check(expression: "\"occupiedSeats\" >= 0", name: "pool_occupied_seats_nonnegative")
+  @@index([driverId, status])
+  @@index([vehicleId, status])
+  @@index([pickupZone, corridor, status])
+  @@map("pools")
+}
+
+model PoolMember {
+  id        Int               @id @default(autoincrement())
+  poolId    Int
+  pool      Pool              @relation(fields:[poolId], references:[id], onDelete: Restrict)
+  requestId Int               @unique()
+  request   Request           @relation(fields:[requestId], references:[id], onDelete: Restrict)
+  seats     Int
+  fare      Decimal
+  joinedAt  TimestamptzString @default(now())
+
+  @@check(expression: "seats > 0", name: "pool_member_seats_positive")
+  @@check(expression: "fare >= 0", name: "pool_member_fare_nonnegative")
+  @@index([poolId])
+  @@map("pool_members")
+}
+
+model Event {
+  id         Int               @id @default(autoincrement())
+  requestId  Int?
+  request    Request?          @relation(fields:[requestId], references:[id], onDelete: Restrict)
+  poolId     Int?
+  pool       Pool?             @relation(fields:[poolId], references:[id], onDelete: Restrict)
+  actorId    Int
+  actor      User              @relation(fields:[actorId], references:[id], onDelete: Restrict)
+  type       String
+  fromStatus Status?
+  toStatus   Status?
+  metadata   Json?
+  createdAt  TimestamptzString @default(now())
+
+  @@index([requestId, createdAt])
+  @@index([poolId, createdAt])
+  @@map("events")
 }
