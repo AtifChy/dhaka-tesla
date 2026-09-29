@@ -2,7 +2,7 @@
 
 Live demo: [https://dhaka-tesla-tau.vercel.app/](https://dhaka-tesla-tau.vercel.app/)
 
-A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose. The frontend foundation uses Next.js 16, React 19, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
+A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose. The frontend uses Next.js 16, React 19 with React Compiler, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
 
 Backend and frontend status: implemented and verified. The browser app includes persisted Zustand authentication, passenger/driver registration, passenger request/cancel/history flows, and driver availability/request/pool lifecycle flows with loading, error, and empty states.
 
