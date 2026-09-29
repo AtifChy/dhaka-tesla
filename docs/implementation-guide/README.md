@@ -27,14 +27,14 @@ Implemented and verified on `master`:
 - Fare/route/transition/rate-limit unit tests and real PostgreSQL concurrency, ownership, cancellation, and lifecycle tests using `deleteAll()` cleanup.
 - PostgreSQL, one-shot migration/seed, API, and standalone Next.js containers started by `docker compose up`.
 - Next.js passenger/driver dashboards with a visual status timeline, Shirin demo quick-fill, and loading/error/empty states.
-- Required `master`, `pre-release`, and `release/v1.0.0` branches (the current edits still need promotion through them).
+- Required `master`, `pre-release`, and `release/v1.0.0` branches, with the current tested code promoted in that order.
 - Root README with architecture, ERD, API, money, verification, Git, deployment, and AI disclosure.
 
 Still to verify or supply before final submission:
 
 - Public end-to-end backend/database deployment, not merely the public frontend URL.
 - README screenshots/GIFs and a recorded six-minute video link.
-- Promotion and acceptance of these latest edits through `pre-release` and `release/v1.0.0`.
+- Final media and public deployment acceptance before submission.
 
 Do not mark a step complete merely because it appears in this guide. Use each acceptance gate.
 
