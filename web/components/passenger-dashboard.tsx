@@ -49,6 +49,16 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+const seatItems = [1, 2, 3].map((count) => ({
+  value: String(count),
+  label: `${count} ${count === 1 ? "seat" : "seats"}`,
+}));
+
+const paymentItems = [
+  { value: "CASH", label: "Cash" },
+  { value: "TESLAPAY", label: "TeslaPay wallet" },
+];
+
 export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboardProps) {
   const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [rides, setRides] = useState<Ride[]>([]);
@@ -57,6 +67,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
   const [seatsRequested, setSeatsRequested] = useState("1");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [isLoading, setIsLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,32 +79,53 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
     setError(errorMessage(caught));
   }
 
-  async function loadData() {
+  function reloadData() {
+    setIsLoading(true);
     setError(null);
-    try {
-      const [routeOptions, passengerRides] = await Promise.all([
-        apiRequest<RouteOption[]>("/rides/options", {}, session.accessToken),
-        apiRequest<Ride[]>("/rides/me", {}, session.accessToken),
-      ]);
-      setRoutes(routeOptions);
-      setRides(passengerRides);
-      setPickupZone((current) => current || routeOptions[0]?.pickupZone || "");
-      setDestinationZone((current) => current || routeOptions[0]?.destinationZone || "");
-    } catch (caught) {
-      handleError(caught);
-    } finally {
-      setIsLoading(false);
-    }
+    setReloadVersion((version) => version + 1);
   }
 
-  /* oxlint-disable react-hooks/exhaustive-deps -- React Compiler stabilizes loadData without manual useCallback. */
+  /* oxlint-disable react/exhaustive-effect-dependencies -- reloadVersion intentionally triggers a fetch after refresh or a ride action. */
   useEffect(() => {
+    let active = true;
+
+    async function loadData() {
+      try {
+        const [routeOptions, passengerRides] = await Promise.all([
+          apiRequest<RouteOption[]>("/rides/options", {}, session.accessToken),
+          apiRequest<Ride[]>("/rides/me", {}, session.accessToken),
+        ]);
+        if (!active) return;
+        setRoutes(routeOptions);
+        setRides(passengerRides);
+        setPickupZone((current) => current || routeOptions[0]?.pickupZone || "");
+        setDestinationZone((current) => current || routeOptions[0]?.destinationZone || "");
+      } catch (caught) {
+        if (!active) return;
+        if (caught instanceof ApiError && caught.status === 401) {
+          onUnauthorized();
+        } else {
+          setError(errorMessage(caught));
+        }
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    }
+
     void loadData();
-  }, [loadData]);
-  /* oxlint-enable react-hooks/exhaustive-deps */
+    return () => {
+      active = false;
+    };
+  }, [session.accessToken, onUnauthorized, reloadVersion]);
+  /* oxlint-enable react/exhaustive-effect-dependencies */
 
   const pickupZones = [...new Set(routes.map((route) => route.pickupZone))];
   const destinations = routes.filter((route) => route.pickupZone === pickupZone);
+  const pickupItems = pickupZones.map((zone) => ({ value: zone, label: formatZone(zone) }));
+  const destinationItems = destinations.map((route) => ({
+    value: route.destinationZone,
+    label: formatZone(route.destinationZone),
+  }));
   const selectedRoute = routes.find(
     (route) => route.pickupZone === pickupZone && route.destinationZone === destinationZone,
   );
@@ -131,7 +163,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
         },
         session.accessToken,
       );
-      await loadData();
+      reloadData();
     } catch (caught) {
       handleError(caught);
     } finally {
@@ -144,7 +176,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
     setError(null);
     try {
       await apiRequest<Ride>(`/rides/${rideId}/cancel`, { method: "POST" }, session.accessToken);
-      await loadData();
+      reloadData();
     } catch (caught) {
       handleError(caught);
     } finally {
@@ -162,7 +194,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
             Choose a route, see the exact fare, and request your seat.
           </p>
         </div>
-        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading}>
+        <Button variant="outline" onClick={reloadData} disabled={isLoading}>
           <RefreshCw className={isLoading ? "animate-spin" : ""} />
           Refresh
         </Button>
@@ -198,14 +230,14 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Pickup</Label>
-                    <Select value={pickupZone} onValueChange={changePickup}>
+                    <Select items={pickupItems} value={pickupZone} onValueChange={changePickup}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {pickupZones.map((zone) => (
-                          <SelectItem key={zone} value={zone}>
-                            {formatZone(zone)}
+                        {pickupItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -214,6 +246,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                   <div className="space-y-2">
                     <Label>Destination</Label>
                     <Select
+                      items={destinationItems}
                       value={destinationZone}
                       onValueChange={(value) => setDestinationZone(value ?? "")}
                     >
@@ -221,9 +254,9 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {destinations.map((route) => (
-                          <SelectItem key={route.destinationZone} value={route.destinationZone}>
-                            {formatZone(route.destinationZone)}
+                        {destinationItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -232,6 +265,7 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                   <div className="space-y-2">
                     <Label>Seats</Label>
                     <Select
+                      items={seatItems}
                       value={seatsRequested}
                       onValueChange={(value) => setSeatsRequested(value ?? "1")}
                     >
@@ -239,9 +273,9 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3].map((count) => (
-                          <SelectItem key={count} value={String(count)}>
-                            {count} {count === 1 ? "seat" : "seats"}
+                        {seatItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -249,13 +283,20 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                   </div>
                   <div className="space-y-2">
                     <Label>Payment</Label>
-                    <Select value={paymentMethod} onValueChange={changePaymentMethod}>
+                    <Select
+                      items={paymentItems}
+                      value={paymentMethod}
+                      onValueChange={changePaymentMethod}
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="CASH">Cash</SelectItem>
-                        <SelectItem value="TESLAPAY">TeslaPay wallet</SelectItem>
+                        {paymentItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
