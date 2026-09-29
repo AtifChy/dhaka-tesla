@@ -68,6 +68,6 @@ bun run migrate
 bun run db:seed
 bun run typecheck
 bun run test
-bun run test:integration
+bun run test:integration # only with DATABASE_URL set to a local disposable PostgreSQL database
 docker compose up --build --wait
 ```

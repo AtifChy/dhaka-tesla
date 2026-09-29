@@ -87,7 +87,7 @@ This keeps required seed users and unrelated developer data intact.
 
 ```bash
 bun run test
-bun --env-file=.env run test:integration
+bun run test:integration # set DATABASE_URL to a local disposable PostgreSQL database first
 ```
 
 Start PostgreSQL and apply migrations before the integration suite:
@@ -97,4 +97,4 @@ bun run db:up
 bun --env-file=.env run migrate
 ```
 
-Verified on 2026-09-28: 13 unit tests and the final-seat integration test pass.
+Verified on 2026-09-30: 17 unit tests and two local-PostgreSQL integration tests pass. The second integration test covers ownership and cancellation/lifecycle recovery. Never run this suite against a remote `DATABASE_URL`.
