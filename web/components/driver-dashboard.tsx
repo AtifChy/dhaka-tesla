@@ -46,6 +46,7 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
   const [requests, setRequests] = useState<AvailableRequest[]>([]);
   const [pools, setPools] = useState<Pool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,29 +58,45 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
     setError(errorMessage(caught));
   }
 
-  async function loadData() {
+  function reloadData() {
+    setIsLoading(true);
     setError(null);
-    try {
-      const [driverVehicle, availableRequests, driverPools] = await Promise.all([
-        apiRequest<Vehicle>("/driver/vehicle", {}, session.accessToken),
-        apiRequest<AvailableRequest[]>("/driver/requests", {}, session.accessToken),
-        apiRequest<Pool[]>("/driver/pools", {}, session.accessToken),
-      ]);
-      setVehicle(driverVehicle);
-      setRequests(availableRequests);
-      setPools(driverPools);
-    } catch (caught) {
-      handleError(caught);
-    } finally {
-      setIsLoading(false);
-    }
+    setReloadVersion((version) => version + 1);
   }
 
-  /* oxlint-disable react-hooks/exhaustive-deps -- React Compiler stabilizes loadData without manual useCallback. */
+  /* oxlint-disable react/exhaustive-effect-dependencies -- reloadVersion intentionally triggers a fetch after refresh or a driver action. */
   useEffect(() => {
+    let active = true;
+
+    async function loadData() {
+      try {
+        const [driverVehicle, availableRequests, driverPools] = await Promise.all([
+          apiRequest<Vehicle>("/driver/vehicle", {}, session.accessToken),
+          apiRequest<AvailableRequest[]>("/driver/requests", {}, session.accessToken),
+          apiRequest<Pool[]>("/driver/pools", {}, session.accessToken),
+        ]);
+        if (!active) return;
+        setVehicle(driverVehicle);
+        setRequests(availableRequests);
+        setPools(driverPools);
+      } catch (caught) {
+        if (!active) return;
+        if (caught instanceof ApiError && caught.status === 401) {
+          onUnauthorized();
+        } else {
+          setError(errorMessage(caught));
+        }
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    }
+
     void loadData();
-  }, [loadData]);
-  /* oxlint-enable react-hooks/exhaustive-deps */
+    return () => {
+      active = false;
+    };
+  }, [session.accessToken, onUnauthorized, reloadVersion]);
+  /* oxlint-enable react/exhaustive-effect-dependencies */
 
   async function toggleOnline() {
     if (!vehicle) return;
@@ -92,7 +109,7 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
         { method: "POST" },
         session.accessToken,
       );
-      await loadData();
+      reloadData();
     } catch (caught) {
       handleError(caught);
     } finally {
@@ -109,7 +126,7 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
         { method: "POST" },
         session.accessToken,
       );
-      await loadData();
+      reloadData();
     } catch (caught) {
       handleError(caught);
     } finally {
@@ -129,7 +146,7 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
         { method: "POST" },
         session.accessToken,
       );
-      await loadData();
+      reloadData();
     } catch (caught) {
       handleError(caught);
     } finally {
@@ -154,7 +171,7 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
             Go online, accept compatible passengers, and advance each pool in order.
           </p>
         </div>
-        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading}>
+        <Button variant="outline" onClick={reloadData} disabled={isLoading}>
           <RefreshCw className={isLoading ? "animate-spin" : ""} />
           Refresh
         </Button>
