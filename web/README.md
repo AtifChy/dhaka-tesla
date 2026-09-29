@@ -1,6 +1,6 @@
 # Dhaka Tesla Pool web
 
-Next.js 16 App Router frontend with React 19, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
+Next.js 16 App Router frontend with React 19 and React Compiler, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
 
 ## Development
 
