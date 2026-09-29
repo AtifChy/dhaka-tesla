@@ -50,27 +50,28 @@ Use this as the build order. Do not begin release work while a previous gate is 
 
 ## Phase 6 - frontend
 
-- [ ] Next.js App Router project.
-- [ ] Typed API client and session handling.
-- [ ] Passenger flow and history.
-- [ ] Driver dashboard and history.
-- [ ] Loading, error, empty, pending, and terminal states.
-- [ ] Responsive, usable demo interface.
+- [x] Next.js App Router project.
+- [x] Typed API client and session handling.
+- [x] Passenger flow and history.
+- [x] Driver dashboard and history.
+- [x] Loading, error, empty, pending, and terminal states with visual ride progress.
+- [x] Responsive, usable demo interface.
 
 ## Phase 7 - Docker and deployment
 
 - [x] Production API Dockerfile.
-- [ ] Next.js standalone Dockerfile.
-- [ ] Compose web service (migrate and API services are complete).
-- [x] PostgreSQL/API health checks and dependency ordering.
+- [x] Next.js standalone Dockerfile.
+- [x] Compose web service.
+- [x] PostgreSQL/API/web health checks and dependency ordering.
 - [x] Compose migration, seed, health, login, and Swagger smoke test.
-- [x] Documented reproducible Docker fallback; public free-tier deployment remains pending.
+- [x] Documented reproducible Docker fallback and public frontend URL.
+- [ ] Verify the public backend/database with a full passenger-and-driver ride flow.
 
 ## Phase 8 - pre-release and release
 
-- [ ] All working feature branches merged into `master`.
+- [ ] All working feature branches merged into `master` (documentation branch is in progress).
 - [ ] Merge `master` into `pre-release` for integration/docs/deployment checks.
-- [ ] Complete root README, screenshots, diagrams, and AI disclosure.
+- [ ] Capture README screenshots/GIFs; architecture, ERD, and AI disclosure are documented.
 - [ ] Run format, lint, type check, build, tests, migration verification, and Compose smoke test.
 - [ ] Cut `release/v1.0.0` from `pre-release`.
 - [ ] Record the maximum six-minute video using that version.
@@ -86,6 +87,7 @@ bun run fmt:check
 bun run lint
 bun run build
 bun run test
+bun run test:integration # only after setting DATABASE_URL to a local disposable PostgreSQL database
 bun --env-file=.env run migration:status
 bun --env-file=.env run db:verify
 bun run db:seed

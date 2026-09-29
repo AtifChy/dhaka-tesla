@@ -133,7 +133,7 @@ All require a passenger JWT.
 All reads are scoped by authenticated passenger ID. A matched response may include the pool ID, vehicle display name, and status, but never other passengers or their fares.
 
 - `REQUESTED -> CANCELED`: update request and append event in one transaction.
-- `MATCHED -> CANCELED`: delete membership, release its exact seats, update request, append request/pool events in one transaction.
+- `MATCHED -> CANCELED`: delete membership, release its exact seats, update request, append request/pool events in one transaction. If this was the last member, also cancel the empty pool.
 - After `DRIVER_ARRIVED` or `STARTED`: reject cancellation with `409 INVALID_TRANSITION`.
 
 ## Suggested commits

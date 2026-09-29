@@ -24,14 +24,17 @@ Implemented and verified on `master`:
 - `User`, `Vehicle`, `Request`, `Pool`, `PoolMember`, and `Event` models using integer IDs.
 - Idempotent Jashim/Nusrat/Rafiq/Shirin and Bullet seed data.
 - Passenger requests, fixed routes, hand-testable fares, cancellation, driver matching, pooling, and lifecycle transitions.
-- Fare/transition unit tests and a real PostgreSQL final-seat concurrency test using `deleteAll()` cleanup.
-- PostgreSQL, one-shot migration/seed, and healthy API containers started by `docker compose up`.
+- Fare/route/transition/rate-limit unit tests and real PostgreSQL concurrency, ownership, cancellation, and lifecycle tests using `deleteAll()` cleanup.
+- PostgreSQL, one-shot migration/seed, API, and standalone Next.js containers started by `docker compose up`.
+- Next.js passenger/driver dashboards with a visual status timeline, Shirin demo quick-fill, and loading/error/empty states.
+- Required `master`, `pre-release`, and `release/v1.0.0` branches (the current edits still need promotion through them).
 - Root README with architecture, ERD, API, money, verification, Git, deployment, and AI disclosure.
 
-Not implemented yet:
+Still to verify or supply before final submission:
 
-- Next.js frontend and its Compose service.
-- Public free-tier deployment, screenshots, video, pre-release acceptance, and `release/v1.0.0`.
+- Public end-to-end backend/database deployment, not merely the public frontend URL.
+- README screenshots/GIFs and a recorded six-minute video link.
+- Promotion and acceptance of these latest edits through `pre-release` and `release/v1.0.0`.
 
 Do not mark a step complete merely because it appears in this guide. Use each acceptance gate.
 
