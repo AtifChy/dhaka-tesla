@@ -69,13 +69,14 @@ Use this as the build order. Do not begin release work while a previous gate is 
 
 ## Phase 8 - pre-release and release
 
-- [ ] All working feature branches merged into `master` (documentation branch is in progress).
-- [ ] Merge `master` into `pre-release` for integration/docs/deployment checks.
+- [x] Tested feature branches merged into `master`.
+- [x] `master` promoted to `pre-release` for integration/docs/deployment checks.
 - [ ] Capture README screenshots/GIFs; architecture, ERD, and AI disclosure are documented.
 - [ ] Run format, lint, type check, build, tests, migration verification, and Compose smoke test.
-- [ ] Cut `release/v1.0.0` from `pre-release`.
+- [x] Existing `release/v1.0.0` updated from `pre-release` without rewriting history.
 - [ ] Record the maximum six-minute video using that version.
-- [ ] Push required branches/tag and verify evaluator access.
+- [x] Push required `master`, `pre-release`, and `release/v1.0.0` branches.
+- [ ] Verify evaluator access, public backend ride flow, and final video link.
 
 ## Final command audit
 
