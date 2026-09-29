@@ -5,7 +5,21 @@ The client chooses only a supported pickup, destination, seat count, and payment
 ## `src/rides/domain/route-catalog.ts`
 
 ```ts
-export const ZONES = ["BANANI", "GULSHAN_1", "MOHAKHALI", "DHANMONDI", "MIRPUR", "UTTARA"] as const;
+export const ZONES = [
+  "BANANI",
+  "BASHUNDHARA",
+  "BADDA",
+  "DHANMONDI",
+  "FARMGATE",
+  "GULSHAN_1",
+  "GULSHAN_2",
+  "KARWAN_BAZAR",
+  "MIRPUR_10",
+  "MOHAKHALI",
+  "MOTIJHEEL",
+  "SHAHBAGH",
+  "UTTARA",
+] as const;
 
 export type Zone = (typeof ZONES)[number];
 
@@ -16,41 +30,38 @@ export interface RouteDefinition {
   corridor: string;
 }
 
-const routes: RouteDefinition[] = [
-  {
-    pickupZone: "BANANI",
-    destinationZone: "MOHAKHALI",
-    distanceMeters: 3_000,
-    corridor: "BANANI_NORTH",
-  },
-  {
-    pickupZone: "BANANI",
-    destinationZone: "GULSHAN_1",
-    distanceMeters: 2_500,
-    corridor: "BANANI_NORTH",
-  },
-  {
-    pickupZone: "MIRPUR",
-    destinationZone: "DHANMONDI",
-    distanceMeters: 8_000,
-    corridor: "MIRPUR_SOUTH",
-  },
-  {
-    pickupZone: "UTTARA",
-    destinationZone: "BANANI",
-    distanceMeters: 12_000,
-    corridor: "AIRPORT_ROAD",
-  },
-];
+interface RoutePair {
+  zones: readonly [Zone, Zone];
+  distanceMeters: number;
+  corridor: string;
+}
 
-export const ROUTES: readonly RouteDefinition[] = routes;
+const ROUTE_PAIRS = [
+  { zones: ["BANANI", "MOHAKHALI"], distanceMeters: 3_000, corridor: "BANANI_NORTH" },
+  { zones: ["BANANI", "GULSHAN_1"], distanceMeters: 2_500, corridor: "BANANI_NORTH" },
+  { zones: ["BANANI", "GULSHAN_2"], distanceMeters: 1_800, corridor: "BANANI_NORTH" },
+  // The production file continues with 14 more two-way pairs.
+] as const satisfies readonly RoutePair[];
+
+export const ROUTES: readonly RouteDefinition[] = ROUTE_PAIRS.flatMap(
+  ({ zones: [firstZone, secondZone], distanceMeters, corridor }) => [
+    { pickupZone: firstZone, destinationZone: secondZone, distanceMeters, corridor },
+    { pickupZone: secondZone, destinationZone: firstZone, distanceMeters, corridor },
+  ],
+).sort(
+  (left, right) =>
+    left.pickupZone.localeCompare(right.pickupZone) ||
+    left.destinationZone.localeCompare(right.destinationZone),
+);
 
 export function findRoute(pickupZone: Zone, destinationZone: Zone): RouteDefinition | undefined {
-  return routes.find(
+  return ROUTES.find(
     (route) => route.pickupZone === pickupZone && route.destinationZone === destinationZone,
   );
 }
 ```
+
+The production catalog contains 17 route pairs across all 13 zones, producing 34 supported directions. Every zone is available as both pickup and destination; unsupported pairs still return `422`.
 
 ## `src/rides/domain/fare-policy.ts`
 
