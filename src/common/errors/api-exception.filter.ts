@@ -21,6 +21,7 @@ const statusCodes: Record<number, string> = {
   404: "NOT_FOUND",
   409: "CONFLICT",
   422: "UNPROCESSABLE_ENTITY",
+  429: "RATE_LIMITED",
 };
 
 @Catch()
@@ -31,9 +32,20 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const request = context.getRequest<FastifyRequest>();
     const reply = context.getResponse<FastifyReply>();
+    const rateLimited =
+      exception instanceof Error && "statusCode" in exception && exception.statusCode === 429;
     const status =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const response = exception instanceof HttpException ? exception.getResponse() : undefined;
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : rateLimited
+          ? HttpStatus.TOO_MANY_REQUESTS
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+    const response =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : rateLimited
+          ? exception.message
+          : undefined;
     const body: ExceptionBody =
       typeof response === "object" && response !== null
         ? (response as ExceptionBody)
