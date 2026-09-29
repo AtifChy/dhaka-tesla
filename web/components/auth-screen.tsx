@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { API_BASE_URL, apiRequest, errorMessage } from "@/lib/api";
-import type { AuthSession } from "@/lib/types";
-import type { Role } from "@/lib/types";
+import { apiRequest, errorMessage } from "@/lib/api";
+import type { AuthSession, Role } from "@/lib/types";
 
 interface AuthScreenProps {
   onAuthenticated: (session: AuthSession) => void;
@@ -257,13 +256,6 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 </div>
               </div>
             )}
-
-            <p
-              className="mt-5 truncate text-center text-xs text-muted-foreground"
-              title={API_BASE_URL}
-            >
-              API: {API_BASE_URL}
-            </p>
           </CardContent>
         </Card>
       </div>
