@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { RideProgress } from "@/components/ride-progress";
 import { StatusBadge } from "@/components/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -341,6 +342,9 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
                         </div>
                       </CardHeader>
                       <CardContent>
+                        <div className="mb-5">
+                          <RideProgress status={pool.status} />
+                        </div>
                         <div className="mb-4 flex items-center justify-between rounded-lg bg-muted p-3 text-sm">
                           <span className="flex items-center gap-2">
                             <Gauge className="size-4 text-primary" /> Occupancy

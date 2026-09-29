@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
 
+import { RideProgress } from "@/components/ride-progress";
 import { StatusBadge } from "@/components/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -382,6 +383,9 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                       <p className="text-lg font-semibold">
                         {ride.currency} {ride.quotedFare}
                       </p>
+                    </div>
+                    <div className="mt-5 border-t pt-4">
+                      <RideProgress status={ride.status} />
                     </div>
                     <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
                       <span className="flex items-center gap-2">

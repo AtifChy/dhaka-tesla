@@ -18,6 +18,7 @@ interface AuthScreenProps {
 const demoAccounts = [
   { label: "Nusrat · passenger", email: "nusrat@example.com" },
   { label: "Rafiq · passenger", email: "rafiq@example.com" },
+  { label: "Shirin · passenger", email: "shirin@example.com" },
   { label: "Jashim · driver", email: "jashim@example.com" },
 ] as const;
 

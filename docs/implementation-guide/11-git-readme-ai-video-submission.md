@@ -16,35 +16,20 @@ This is not the usual “all features merge into a permanent develop/pre-release
 4. Once MVP features are integrated, use `pre-release` for integration fixes, docs, Docker, deployment checks, and video preparation.
 5. Cut `release/v1.0.0` from `pre-release`; that exact version is shown in the video/deployment.
 
-## Repair the current branch shape without rewriting history
+## Promote the current work without rewriting history
 
-Current Git history shows the database commits on `feature/database-foundation` and `pre-release`, while `master` is behind. Preserve the real commits and merge the finished database feature into `master`:
-
-```bash
-git status
-git switch feature/database-foundation
-bun run fmt:check
-bun run build
-bun --env-file=.env run db:verify
-
-git switch master
-git merge --no-ff feature/database-foundation
-```
-
-Do not delete or force-reset `pre-release` merely to make the history look perfect. Leave it dormant while feature work merges to `master`. When the MVP is integrated:
+The database, API, Docker, and frontend features have already been merged to `master`. The required `pre-release` and `release/v1.0.0` branches already exist. For new work, first merge tested feature branches to `master`, then promote in order:
 
 ```bash
 git switch pre-release
 git merge --no-ff master
+git switch release/v1.0.0
+git merge --no-ff pre-release
 ```
 
-Then perform integration fixes and cut the release:
+Do not force-reset or recreate the existing branches. Verify the release build, then push the three branches. Tagging is optional and does not replace the required release branch; do not move an existing tag without explicit approval.
 
-```bash
-git switch -c release/v1.0.0
-```
-
-After final verification, keep all three long-lived branches and push them. Tagging is helpful but does not replace the required release branch:
+If `v1.0.0` does not yet exist and acceptance is complete, it may be created on the release commit:
 
 ```bash
 git tag -a v1.0.0 -m "Dhaka Tesla Pool v1.0.0"

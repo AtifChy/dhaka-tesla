@@ -6,6 +6,8 @@ A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on
 
 Backend and frontend status: implemented and verified. The browser app includes persisted Zustand authentication, passenger/driver registration, passenger request/cancel/history flows, and driver availability/request/pool lifecycle flows with loading, error, and empty states.
 
+Passenger rides and active driver pools show a five-stage progress line. Completed stages fill in with checkmarks, the current stage is highlighted, and cancellation is visually distinct. The login demo list includes all four seeded users, including Shirin.
+
 ## Why REST
 
 REST is a better fit than GraphQL for this MVP because the system has a small set of resources and explicit state-changing commands: create/cancel a request, accept a passenger, and advance a pool. It is easy to inspect in Swagger, exercise with `curl`, and explain during evaluation. GraphQL would add schema and client complexity without solving a current requirement.
@@ -14,7 +16,8 @@ REST is a better fit than GraphQL for this MVP because the system has a small se
 
 ```mermaid
 flowchart LR
-  Browser[Next.js frontend] -->|same-origin /api/v1 proxy| API[NestJS + Fastify REST API]
+  Browser[Browser] -->|pages + same-origin /api/v1| Next[Next.js UI and API rewrite]
+  Next -->|JSON + Bearer JWT| API[NestJS + Fastify REST API]
   Swagger[Swagger evaluator] --> API
   API --> Auth[Passport JWT + role guards]
   API --> Domain[Fares + transitions + capacity rules]
@@ -37,6 +40,48 @@ erDiagram
   REQUEST ||--o| POOL_MEMBER : joins
   REQUEST ||--o{ EVENT : records
   POOL ||--o{ EVENT : records
+
+  USER {
+    int id PK
+    string email UK
+    string role
+    string passwordHash
+  }
+  VEHICLE {
+    int id PK
+    int driverId FK
+    int capacity
+    boolean isOnline
+  }
+  REQUEST {
+    int id PK
+    int passengerId FK
+    string status
+    decimal estimatedFare
+    decimal quotedFare
+  }
+  POOL {
+    int id PK
+    int driverId FK
+    int vehicleId FK
+    string status
+    int capacity
+    int occupiedSeats
+  }
+  POOL_MEMBER {
+    int id PK
+    int poolId FK
+    int requestId FK
+    int seats
+    decimal fare
+  }
+  EVENT {
+    int id PK
+    int requestId FK
+    int poolId FK
+    int actorId FK
+    string type
+  }
 ```
 
 | Table          | Purpose and important constraints                                                                                                  |
@@ -74,7 +119,7 @@ REQUESTED -> MATCHED -> DRIVER_ARRIVED -> STARTED -> COMPLETED
      +-----------+-> CANCELED
 ```
 
-Only listed transitions are allowed. Each transition updates the affected request(s), pool, and event history in one transaction.
+Only listed transitions are allowed. Each transition updates the affected request(s), pool, and event history in one transaction. If the last matched passenger cancels, the now-empty pool also becomes `CANCELED`, releasing the driver to go offline or accept another request.
 
 The fixed catalog has 13 areas: Banani, Bashundhara, Badda, Dhanmondi, Farmgate, Gulshan 1, Gulshan 2, Karwan Bazar, Mirpur 10, Mohakhali, Motijheel, Shahbagh, and Uttara. Each supported pair has a server-owned distance and corridor, and the API returns both directions. No map API is required.
 
@@ -215,21 +260,27 @@ bun --env-file=.env run db:verify
 ```bash
 bun run typecheck
 bun run test
-bun --env-file=.env run test:integration
 bun run build
 cd web && bun run format:check && bun run lint && bun run typecheck && bun run build
 docker compose config
 docker compose up --build --wait
 ```
 
-Verified backend results on 2026-09-28:
+Run integration tests only against a local, disposable PostgreSQL database. The test configuration rejects a non-local host. On PowerShell, set `DATABASE_URL` to your local Compose port (replace `5432` if `POSTGRES_PORT` differs), then run:
 
-- 13 unit tests pass for fares and transition rules.
-- The PostgreSQL concurrency integration test passes and cleans its isolated rows with Prisma 8 `deleteAll()`.
+```powershell
+$env:DATABASE_URL = 'postgresql://dhaka_tesla:dhaka_tesla_dev@localhost:5432/dhaka_tesla'
+bun run test:integration
+```
+
+Verified results through 2026-09-30:
+
+- 17 unit tests pass, including fare, route, transition, and rate-limit behavior.
+- Two real-PostgreSQL integration tests pass: the last-seat race and cancellation/ownership/lifecycle recovery. They clean isolated fixtures with Prisma 8 `deleteAll()`.
 - Prisma reports contract/migration storage hash `7f2bec48f98e75de0632ab253abd2209a7beac48cfeea429276f50330f6a4284` as current.
 - Docker migration/seed exits `0`; PostgreSQL and API health checks pass.
 - Nusrat login, authenticated identity, Swagger, fare quotes, pooling, lifecycle completion, and late-cancel rejection were smoke-tested.
-- The Next.js production/standalone build passes; same-origin API proxying and seeded passenger/driver dashboards were browser-tested.
+- The Next.js production/standalone build passes; same-origin API proxying, seeded dashboards, Shirin quick-fill, and the ride-progress line were browser-tested locally.
 
 ## Project layout
 
@@ -241,7 +292,7 @@ src/
   driver/               vehicle, matching, pooling, lifecycle
   prisma/               Prisma 8 contract, generated contract, seed, DB runtime
   rides/                passenger API, fares, routes, transition rules
-test/                   database concurrency integration test
+test/                   database concurrency and cancellation integration tests
 migrations/             committed Prisma 8 migrations and snapshots
 docs/implementation-guide/
                         step-by-step implementation and AI log
@@ -263,6 +314,22 @@ Completed, tested feature branches are merged into `master` with merge commits, 
 ## Deployment
 
 The public frontend demo is linked above. Pushing a branch does not prove that the hosted frontend and backend have both redeployed, so verify the live route list and a complete ride flow before submitting the public URL as an end-to-end deployment. The local Docker Compose stack remains the reproducible fallback: `docker compose up --build --wait` starts PostgreSQL, runs migrations and seed data, then starts the API and web app. Use only confirmed free-tier hosting; do not pay for deployment.
+
+## Trade-offs and next improvements
+
+| Current choice                                      | Why it fits this assessment                                           | Switch when                                                           |
+| --------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Fixed route catalog, no map API                     | Deterministic matching and hand-checkable fares without external cost | Real geocoding, live routes, or traffic become product requirements   |
+| REST + Swagger                                      | A small command/resource API is easy to test and document             | Clients need flexible, deeply nested cross-resource queries           |
+| Short-lived stateless JWT                           | Simple login and database-backed user validation                      | Device sessions, refresh tokens, or immediate revocation are required |
+| Decimal BDT storage with integer-poysha calculation | Human-readable exact amounts and safe arithmetic                      | A payment ledger or multi-currency accounting is introduced           |
+| Simulated TeslaPay                                  | Covers payment choice without handling real money                     | A real gateway, reconciliation, or refunds are required               |
+
+This MVP has no live maps, traffic/weather pricing, real payments, driver identity verification, push notifications, or production-grade operations/monitoring. The fixed catalog does not support arbitrary addresses. A public frontend URL exists, but a complete hosted backend/database ride flow still needs independent verification; Docker Compose is the reproducible fallback.
+
+## Submission media
+
+README screenshots/GIFs and the maximum six-minute release walkthrough have not yet been captured. The recording script is in [docs/demo-video-script.md](docs/demo-video-script.md). Add the final media and video URL here only after recording and checking the `release/v1.0.0` build; do not substitute a development-branch capture.
 
 ## AI usage disclosure
 
