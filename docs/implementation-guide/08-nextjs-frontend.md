@@ -1,6 +1,6 @@
 # Step 8 - Next.js frontend
 
-The implemented frontend lives in `web/` and uses Next.js App Router, React, shadcn/ui, Tailwind CSS, TypeScript, Zustand, Oxfmt, and Oxlint. Check `web/package.json` and `web/bun.lock` for the exact installed versions.
+The implemented frontend lives in `web/` and uses Next.js App Router, React with React Compiler, shadcn/ui, Tailwind CSS, TypeScript, Zustand, Oxfmt, and Oxlint. Check `web/package.json` and `web/bun.lock` for the exact installed versions.
 
 ## Install and run
 
@@ -27,7 +27,8 @@ bun run build
 
 - `.oxfmtrc.json` sorts imports and Tailwind classes, including classes passed through `cn()` and `cva()`.
 - `.oxlintrc.json` enables React, Next.js, accessibility, TypeScript, promise, Unicorn, and Oxc rules with type-aware checks.
-- `next.config.ts` fixes the Turbopack root, emits standalone Docker output, and proxies API requests.
+- `next.config.ts` enables React Compiler, fixes the Turbopack root, emits standalone Docker output, and proxies API requests.
+- React Compiler automatically optimizes component rendering, so dashboard code uses direct functions and derived arrays instead of manual `useCallback`/`useMemo` wrappers.
 
 ## Implemented structure
 

@@ -10,7 +10,7 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type SubmitEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 
 import { StatusBadge } from "@/components/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -60,18 +60,15 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleError = useCallback(
-    (caught: unknown) => {
-      if (caught instanceof ApiError && caught.status === 401) {
-        onUnauthorized();
-        return;
-      }
-      setError(errorMessage(caught));
-    },
-    [onUnauthorized],
-  );
+  function handleError(caught: unknown) {
+    if (caught instanceof ApiError && caught.status === 401) {
+      onUnauthorized();
+      return;
+    }
+    setError(errorMessage(caught));
+  }
 
-  const loadData = useCallback(async () => {
+  async function loadData() {
     setError(null);
     try {
       const [routeOptions, passengerRides] = await Promise.all([
@@ -87,20 +84,16 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
     } finally {
       setIsLoading(false);
     }
-  }, [handleError, session.accessToken]);
+  }
 
+  /* oxlint-disable react-hooks/exhaustive-deps -- React Compiler stabilizes loadData without manual useCallback. */
   useEffect(() => {
     void loadData();
   }, [loadData]);
+  /* oxlint-enable react-hooks/exhaustive-deps */
 
-  const pickupZones = useMemo(
-    () => [...new Set(routes.map((route) => route.pickupZone))],
-    [routes],
-  );
-  const destinations = useMemo(
-    () => routes.filter((route) => route.pickupZone === pickupZone),
-    [pickupZone, routes],
-  );
+  const pickupZones = [...new Set(routes.map((route) => route.pickupZone))];
+  const destinations = routes.filter((route) => route.pickupZone === pickupZone);
   const selectedRoute = routes.find(
     (route) => route.pickupZone === pickupZone && route.destinationZone === destinationZone,
   );
