@@ -21,13 +21,18 @@ Use a deterministic route catalog instead of a map API:
 ```ts
 export const ZONES = [
   "BANANI",
-  "GULSHAN_1",
-  "MOHAKHALI",
-  "DHANMONDI",
-  "MIRPUR",
-  "UTTARA",
-  "FARMGATE",
   "BASHUNDHARA",
+  "BADDA",
+  "DHANMONDI",
+  "FARMGATE",
+  "GULSHAN_1",
+  "GULSHAN_2",
+  "KARWAN_BAZAR",
+  "MIRPUR_10",
+  "MOHAKHALI",
+  "MOTIJHEEL",
+  "SHAHBAGH",
+  "UTTARA",
 ] as const;
 
 export const ROUTES = {
@@ -42,7 +47,9 @@ export const ROUTES = {
 } as const;
 ```
 
-Nusrat and Rafiq are compatible because both start in `BANANI` and use `BANANI_NORTH`, even though their destinations differ.
+The implementation defines 17 two-way route pairs, producing 34 supported directions. Every zone can be used as both pickup and destination, but only catalog pairs are accepted. Distances and corridors remain server-owned.
+
+Nusrat and Rafiq are compatible because both start in `BANANI` and use `BANANI_NORTH`, even though their destinations differ. Matching always requires both the same pickup zone and the same corridor.
 
 ## Hand-testable pooled fare
 

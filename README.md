@@ -76,7 +76,9 @@ REQUESTED -> MATCHED -> DRIVER_ARRIVED -> STARTED -> COMPLETED
 
 Only listed transitions are allowed. Each transition updates the affected request(s), pool, and event history in one transaction.
 
-Pool matching requires the same pickup zone and corridor. A driver acceptance uses an atomic conditional SQL update equivalent to:
+The fixed catalog has 13 areas: Banani, Bashundhara, Badda, Dhanmondi, Farmgate, Gulshan 1, Gulshan 2, Karwan Bazar, Mirpur 10, Mohakhali, Motijheel, Shahbagh, and Uttara. Each supported pair has a server-owned distance and corridor, and the API returns both directions. No map API is required.
+
+Pool matching requires the same pickup zone and corridor. For example, Nusrat's Banani → Mohakhali request and Rafiq's Banani → Gulshan 1 request both use `BANANI_NORTH`, so they are compatible even though their destinations differ. A driver acceptance uses an atomic conditional SQL update equivalent to:
 
 ```sql
 UPDATE pools
