@@ -258,11 +258,11 @@ The assignment's required flow is followed:
 feature/* -> master -> pre-release -> release/v1.0.0
 ```
 
-Completed, tested feature branches are merged into `master` with merge commits. `pre-release` is intentionally not advanced until the whole MVP, including the frontend, is ready for acceptance. `release/v1.0.0` should be created only after the pre-release checklist passes; release is the last merge stage, not the place for unfinished work.
+Completed, tested feature branches are merged into `master` with merge commits, then promoted through `pre-release` into `release/v1.0.0`. Keep fixes in that order; the release branch is not the place for unfinished work.
 
 ## Deployment
 
-No paid service is required. A public deployment has not been created yet because suitable always-free backend/database availability can change. The Docker setup is the reproducible deployment fallback: any free VM/container host that supports Docker Compose can run the same stack. If a public host is selected later, use only a confirmed free tier, supply secrets through the host, run migrations before API startup, and configure the frontend proxy for the public API service.
+The public frontend demo is linked above. Pushing a branch does not prove that the hosted frontend and backend have both redeployed, so verify the live route list and a complete ride flow before submitting the public URL as an end-to-end deployment. The local Docker Compose stack remains the reproducible fallback: `docker compose up --build --wait` starts PostgreSQL, runs migrations and seed data, then starts the API and web app. Use only confirmed free-tier hosting; do not pay for deployment.
 
 ## AI usage disclosure
 
