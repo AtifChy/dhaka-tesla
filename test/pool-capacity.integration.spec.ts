@@ -14,14 +14,14 @@ let driver: AuthUser;
 let driverId: number | undefined;
 const passengerIds: number[] = [];
 
-async function createRequest(passengerId: number, destinationZone: string) {
+async function createRequest(passengerId: number, destinationZone: string, seatsRequested = 1) {
   return db.orm.public.Request.create({
     passengerId,
     pickupZone: "BANANI",
     destinationZone,
     corridor: "BANANI_NORTH",
     distanceMeters: 3_000,
-    seatsRequested: 1,
+    seatsRequested,
     status: "REQUESTED",
     estimatedFare: "112.00",
     quotedFare: "112.00",
@@ -44,11 +44,11 @@ describe("pool capacity integration", () => {
     await db.orm.public.Vehicle.create({
       driverId: testDriver.id,
       name: "Test Bullet",
-      capacity: 2,
+      capacity: 3,
       isOnline: true,
     });
 
-    for (const name of ["First", "Second", "Third"]) {
+    for (const name of ["Rafiq", "Nusrat", "Shirin"]) {
       const passenger = await db.orm.public.User.create({
         name,
         email: `capacity-${name.toLowerCase()}-${suffix}@example.com`,
@@ -80,12 +80,12 @@ describe("pool capacity integration", () => {
   });
 
   it("allows exactly one request to claim the final seat", async () => {
-    const first = await createRequest(passengerIds[0]!, "MOHAKHALI");
+    const first = await createRequest(passengerIds[0]!, "MOHAKHALI", 2);
     const second = await createRequest(passengerIds[1]!, "GULSHAN_1");
     const third = await createRequest(passengerIds[2]!, "GULSHAN_1");
 
     const initialPool = await driverService.accept(driver, first.id);
-    expect(initialPool.occupiedSeats).toBe(1);
+    expect(initialPool.occupiedSeats).toBe(2);
 
     const results = await Promise.allSettled([
       driverService.accept(driver, second.id),
@@ -104,8 +104,8 @@ describe("pool capacity integration", () => {
     const memberships = await db.orm.public.PoolMember.where({
       poolId: initialPool.id,
     }).all();
-    expect(storedPool?.occupiedSeats).toBe(2);
-    expect(storedPool?.capacity).toBe(2);
+    expect(storedPool?.occupiedSeats).toBe(3);
+    expect(storedPool?.capacity).toBe(3);
     expect(memberships).toHaveLength(2);
 
     const contenders = await Promise.all([

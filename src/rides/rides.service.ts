@@ -105,6 +105,7 @@ export class RidesService {
           UPDATE pools
           SET "occupiedSeats" = "occupiedSeats" - ${membership.seats}
           WHERE id = ${membership.poolId}
+            AND status = 'MATCHED'
             AND "occupiedSeats" >= ${membership.seats}
         `
           .affectedCount()
@@ -120,10 +121,18 @@ export class RidesService {
         await transaction.orm.public.PoolMember.where({ id: membership.id }).delete();
       }
 
-      const updated = await transaction.orm.public.Request.where({ id: requestId }).update({
-        status: "CANCELED",
-      });
-      if (!updated) throw new Error("Canceled ride could not be reloaded");
+      const updated = await transaction.orm.public.Request.where({
+        id: requestId,
+        passengerId: user.id,
+        status: ride.status,
+      }).update({ status: "CANCELED" });
+      if (!updated) {
+        throw new DomainException(
+          HttpStatus.CONFLICT,
+          "RIDE_CHANGED",
+          "Ride status changed before cancellation",
+        );
+      }
       await transaction.orm.public.Event.create({
         requestId,
         poolId: membership?.poolId ?? null,
@@ -133,6 +142,40 @@ export class RidesService {
         toStatus: "CANCELED",
         metadata: membership ? { seatsReleased: membership.seats } : null,
       });
+
+      if (membership) {
+        const remaining = await transaction.orm.public.PoolMember.where({
+          poolId: membership.poolId,
+        }).first();
+        if (!remaining) {
+          const closeEmptyPool = db.raw.sql`
+            UPDATE pools
+            SET status = 'CANCELED'
+            WHERE id = ${membership.poolId}
+              AND status = 'MATCHED'
+              AND "occupiedSeats" = 0
+          `
+            .affectedCount()
+            .build();
+          const closed = await transaction.execute(closeEmptyPool);
+          if (closed.affectedRows !== 1) {
+            throw new DomainException(
+              HttpStatus.CONFLICT,
+              "POOL_CLOSE_FAILED",
+              "Empty pool could not be canceled",
+            );
+          }
+          await transaction.orm.public.Event.create({
+            requestId: null,
+            poolId: membership.poolId,
+            actorId: user.id,
+            type: "POOL_CANCELED",
+            fromStatus: "MATCHED",
+            toStatus: "CANCELED",
+            metadata: { reason: "LAST_MEMBER_CANCELED" },
+          });
+        }
+      }
 
       return toRideResponse(updated, membership?.poolId ?? null);
     });
