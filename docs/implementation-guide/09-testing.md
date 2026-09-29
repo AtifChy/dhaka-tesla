@@ -2,18 +2,16 @@
 
 ## Current status
 
-The repository has 13 unit tests for fare/transition rules and one real PostgreSQL final-seat concurrency test. Vitest is a direct development dependency. Add further API/ownership cases when the API surface expands rather than chasing a vanity coverage percentage.
+The repository has 17 unit tests and two real-PostgreSQL integration tests. Vitest is a direct development dependency. The integration suites cover a final-seat race, ownership, cancellation of the last matched member, driver recovery, and late-cancellation rejection. Add further cases when the API surface expands rather than chasing a vanity coverage percentage.
 
 Package scripts:
 
 ```json
 {
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:unit": "vitest run test/unit",
-    "test:api": "vitest run test/api",
-    "test:integration": "vitest run test/integration"
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest"
   }
 }
 ```
@@ -21,20 +19,15 @@ Package scripts:
 ## Test structure
 
 ```text
+src/rides/domain/
+  fare-policy.spec.ts
+  route-catalog.spec.ts
+  ride-transitions.spec.ts
+src/common/errors/
+  api-exception.filter.spec.ts
 test/
-  unit/
-    fare-policy.spec.ts
-    route-compatibility.spec.ts
-    ride-transitions.spec.ts
-  api/
-    auth.spec.ts
-    passenger-ownership.spec.ts
-    driver-authorization.spec.ts
-    validation-errors.spec.ts
-  integration/
-    database-constraints.spec.ts
-    pool-capacity.spec.ts
-    seed.spec.ts
+  pool-capacity.integration.spec.ts
+  ride-cancellation.integration.spec.ts
 ```
 
 ## Unit examples
@@ -53,7 +46,7 @@ describe("pooled fare", () => {
 
 ```ts
 it("rejects skipping directly from MATCHED to COMPLETED", () => {
-  expect(() => assertTransition("MATCHED", "COMPLETED")).toThrow(InvalidTransitionError);
+  expect(() => assertTransition("MATCHED", "COMPLETED")).toThrow(/Cannot change ride status/);
 });
 ```
 
@@ -85,7 +78,16 @@ Create the Nest application with the Fastify adapter and use `app.inject()`; no 
 
 ## Integration database
 
-Use a separate database such as `dhaka_tesla_test`. Never point tests at the developer or deployed database.
+Use a local disposable database, ideally separate from the development database. Never point tests at a deployed database. `vitest.integration.config.ts` rejects any `DATABASE_URL` whose host is not `localhost`, `127.0.0.1`, or `postgres`; this is a safety guard, not a substitute for checking the database name and port yourself. Do not use `bun --env-file=.env run test:integration` if `.env` points to a remote service.
+
+For the default local Compose port on PowerShell:
+
+```powershell
+$env:DATABASE_URL = 'postgresql://dhaka_tesla:dhaka_tesla_dev@localhost:5432/dhaka_tesla'
+bun run test:integration
+```
+
+Adjust the port to `POSTGRES_PORT` and ensure checked-in migrations have been applied first.
 
 For each integration suite:
 

@@ -105,7 +105,10 @@ For a matched cancellation:
 3. Delete membership.
 4. Atomically decrement `occupiedSeats` by exactly `membership.seats` with a non-negative predicate.
 5. Mark request `CANCELED`.
-6. Append events.
+6. If no members remain and occupancy is zero, move the matched pool to `CANCELED` so it cannot strand the driver.
+7. Append request and pool events.
+
+Test this edge case with real PostgreSQL: after the last member cancels, the driver can go offline or accept a new route; a later `DRIVER_ARRIVED` cancellation still fails.
 
 ## Required concurrency test
 
