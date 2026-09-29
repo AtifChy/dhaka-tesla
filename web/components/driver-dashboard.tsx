@@ -11,7 +11,7 @@ import {
   UserRoundCheck,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { StatusBadge } from "@/components/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -49,18 +49,15 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleError = useCallback(
-    (caught: unknown) => {
-      if (caught instanceof ApiError && caught.status === 401) {
-        onUnauthorized();
-        return;
-      }
-      setError(errorMessage(caught));
-    },
-    [onUnauthorized],
-  );
+  function handleError(caught: unknown) {
+    if (caught instanceof ApiError && caught.status === 401) {
+      onUnauthorized();
+      return;
+    }
+    setError(errorMessage(caught));
+  }
 
-  const loadData = useCallback(async () => {
+  async function loadData() {
     setError(null);
     try {
       const [driverVehicle, availableRequests, driverPools] = await Promise.all([
@@ -76,11 +73,13 @@ export function DriverDashboard({ session, onUnauthorized }: DriverDashboardProp
     } finally {
       setIsLoading(false);
     }
-  }, [handleError, session.accessToken]);
+  }
 
+  /* oxlint-disable react-hooks/exhaustive-deps -- React Compiler stabilizes loadData without manual useCallback. */
   useEffect(() => {
     void loadData();
   }, [loadData]);
+  /* oxlint-enable react-hooks/exhaustive-deps */
 
   async function toggleOnline() {
     if (!vehicle) return;
