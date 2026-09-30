@@ -1,6 +1,6 @@
 "use client";
 
-import { CarFront, CircleCheck, LoaderCircle, MapPin, Users } from "lucide-react";
+import { CarFront, CircleCheck, Eye, EyeOff, LoaderCircle, MapPin, Users } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -36,6 +36,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
   const [vehicleCapacity, setVehicleCapacity] = useState("3");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -77,6 +78,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     setMode("login");
     setEmail(emailAddress);
     setPassword("superstrongpassword");
+    setShowPassword(false);
     setError(null);
   }
 
@@ -112,14 +114,20 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
               <Button
                 type="button"
                 variant={mode === "login" ? "outline" : "ghost"}
-                onClick={() => setMode("login")}
+                onClick={() => {
+                  setMode("login");
+                  setShowPassword(false);
+                }}
               >
                 Log in
               </Button>
               <Button
                 type="button"
                 variant={mode === "register" ? "outline" : "ghost"}
-                onClick={() => setMode("register")}
+                onClick={() => {
+                  setMode("register");
+                  setShowPassword(false);
+                }}
               >
                 Create account
               </Button>
@@ -211,17 +219,32 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder={mode === "login" ? "Your password" : "At least 10 characters"}
-                  minLength={mode === "register" ? 10 : 1}
-                  maxLength={128}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    className="pr-10"
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder={mode === "login" ? "Your password" : "At least 10 characters"}
+                    minLength={mode === "register" ? 10 : 1}
+                    maxLength={128}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-controls="password"
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                  >
+                    {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  </Button>
+                </div>
               </div>
 
               {error && (

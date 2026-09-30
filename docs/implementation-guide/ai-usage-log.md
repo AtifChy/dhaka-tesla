@@ -30,6 +30,10 @@ This log supports the assignment's required AI disclosure. It records material a
 
 At the user's request, OpenAI Codex removed the video-script Markdown file from branch history and removed the copy-ready backend appendix from the current implementation guide. The cleanup also removed dangling links and committed the user's pending README and Prisma Cloud region changes. A recovery bundle was retained outside the repository before rewriting history. Verification covered formatting, TypeScript, the cleaned guide paths, and the rewritten local and published branch tips. The implementation source and AI disclosure remain part of the submission.
 
+## Password visibility — 2026-09-30
+
+At the user's request, OpenAI Codex added a show/hide eye button to the shared login and passenger/driver signup password field. It uses local state, keeps passwords hidden by default, re-hides them when switching login/signup or choosing a demo account, and never submits the form. The existing password value, validation, and autocomplete behavior are unchanged. Frontend Oxlint, TypeScript, formatting, and production build passed. A separate local browser preview verified mouse/keyboard toggling, both signup roles, and the mode-change reset without submitting credentials. Evidence: `feature/password-visibility`.
+
 ## Working rules
 
 1. Never include `.env` secrets, access tokens, or real customer data in an AI prompt.
