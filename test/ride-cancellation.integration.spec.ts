@@ -72,14 +72,21 @@ describe("ride cancellation integration", () => {
     }
   }, 30_000);
 
-  it("protects ownership, closes an empty matched pool, and rejects late cancellation", async () => {
+  it("preserves a multi-seat quote, releases all seats, protects ownership, and rejects late cancellation", async () => {
     const first = await rides.create(nusrat, {
       pickupZone: "BANANI",
       destinationZone: "MOHAKHALI",
-      seatsRequested: 1,
+      seatsRequested: 2,
       paymentMethod: "CASH",
     });
     requestIds.push(first.id);
+    expect(first).toMatchObject({ estimatedFare: "224.00", quotedFare: "224.00" });
+    expect(await rides.one(nusrat, first.id)).toMatchObject({ quotedFare: "224.00" });
+    expect(await driverService.availableRequests(driver)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: first.id, seatsRequested: 2, estimatedFare: "224.00" }),
+      ]),
+    );
 
     await expect(rides.one(shirin, first.id)).rejects.toMatchObject({
       code: "RIDE_NOT_FOUND",
@@ -90,6 +97,10 @@ describe("ride cancellation integration", () => {
 
     const firstPool = await driverService.accept(driver, first.id);
     poolIds.push(firstPool.id);
+    expect(firstPool.occupiedSeats).toBe(2);
+    expect(firstPool.members).toEqual([
+      expect.objectContaining({ requestId: first.id, seats: 2, fare: "224.00" }),
+    ]);
     const canceled = await rides.cancel(nusrat, first.id);
     expect(canceled.status).toBe("CANCELED");
     expect(await db.orm.public.PoolMember.where({ poolId: firstPool.id }).all()).toHaveLength(0);

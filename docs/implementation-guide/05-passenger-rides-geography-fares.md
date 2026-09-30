@@ -56,9 +56,9 @@ Nusrat and Rafiq are compatible because both start in `BANANI` and use `BANANI_N
 Use this documented formula:
 
 ```text
-soloFare       = baseFare + distanceKm * distanceRate
-poolDiscount   = soloFare * 20%
-passengerFare  = soloFare - poolDiscount
+soloFarePerSeat = baseFare + distanceKm * distanceRate
+pooledPerSeat   = soloFarePerSeat * 80%
+bookingTotal    = pooledPerSeat * seatsRequested
 
 baseFare       = BDT 80.00
 distanceRate   = BDT 20.00 per km
@@ -71,14 +71,18 @@ const BASE_FARE_POYSHA = 8_000;
 const PER_KM_POYSHA = 2_000;
 const POOLED_PERCENT = 80;
 
-export function calculatePooledFarePoysha(distanceMeters: number): number {
+export function calculatePooledFarePoysha(distanceMeters: number, seatsRequested = 1): number {
   if (!Number.isInteger(distanceMeters) || distanceMeters <= 0) {
     throw new Error("distanceMeters must be a positive integer");
+  }
+  if (!Number.isInteger(seatsRequested) || seatsRequested < 1 || seatsRequested > 3) {
+    throw new Error("seatsRequested must be an integer between 1 and 3");
   }
 
   const distanceCharge = Math.round((distanceMeters * PER_KM_POYSHA) / 1_000);
   const soloFare = BASE_FARE_POYSHA + distanceCharge;
-  return Math.round((soloFare * POOLED_PERCENT) / 100);
+  const perSeatFare = Math.round((soloFare * POOLED_PERCENT) / 100);
+  return perSeatFare * seatsRequested;
 }
 ```
 
@@ -87,9 +91,13 @@ Manual examples:
 ```text
 Nusrat: 80.00 + 3.0 * 20.00 = 140.00; minus 20% = BDT 112.00
 Rafiq:  80.00 + 2.5 * 20.00 = 130.00; minus 20% = BDT 104.00
+Two seats: Nusrat = BDT 224.00; Rafiq = BDT 208.00
+Three seats: Nusrat = BDT 336.00; Rafiq = BDT 312.00
 ```
 
-Persist `"112.00"` and `"104.00"` as Decimal strings. Return fare as a string plus `currency: "BDT"`. Do not accept distance, corridor, fare, passenger ID, or status from the browser.
+These first two examples reserve one seat each. Round the per-seat fare to integer poysha before multiplying by seats. Persist the **booking total** as a Decimal string and return it with `currency: "BDT"`. Route options contain one-seat quotes; the browser multiplies that quote for its preview only. The API independently recalculates the total from the route and validated `seatsRequested`. Do not accept distance, corridor, fare, passenger ID, or status from the browser.
+
+The 20% discount is applied upfront, even before another passenger joins. Pool occupancy does not reprice a booking. Existing quotes remain unchanged; no data migration is needed for the per-seat rule.
 
 Traffic/weather multipliers are unnecessary. If added, they must be fixed, visible inputs that preserve the evaluator's hand calculation.
 
@@ -100,7 +108,7 @@ const CreateRequestSchema = z
   .object({
     pickupZone: z.enum(ZONES),
     destinationZone: z.enum(ZONES),
-    seats: z.number().int().min(1).max(3),
+    seatsRequested: z.number().int().min(1).max(3),
     paymentMethod: z.enum(["CASH", "TESLAPAY"]),
   })
   .refine((value) => value.pickupZone !== value.destinationZone, {
@@ -123,7 +131,7 @@ All require a passenger JWT.
 ## Create request transaction
 
 1. Resolve the route from the server-owned catalog.
-2. Calculate the estimated fare using the pure function.
+2. Calculate the booking total using the route distance and `seatsRequested`.
 3. Create `Request` with authenticated `passengerId` and `REQUESTED`.
 4. Create `Event` with `type: REQUEST_CREATED`, no `fromStatus`, and `toStatus: REQUESTED`.
 5. Commit and return a response DTO without private relations.
@@ -148,6 +156,8 @@ feat(rides): enforce ownership and cancellation rules
 
 - Nusrat calculates to exactly `112.00` BDT.
 - Rafiq calculates to exactly `104.00` BDT.
+- Two-seat totals are `224.00` and `208.00`; three-seat totals are `336.00` and `312.00`.
+- The browser preview, persisted request quote, driver request list, and pool-member fare agree.
 - Unsupported route pairs return `422`.
 - A passenger cannot retrieve or cancel another passenger's request.
 - Create/cancel operations always write explanatory events.

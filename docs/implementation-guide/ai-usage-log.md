@@ -42,6 +42,12 @@ At the user's request, OpenAI Codex added a shared sun/moon button to the login/
 
 At the user's request, OpenAI Codex aligned the dashboard theme and logout buttons using matching 32px ghost buttons within one shared outline. The initially suggested role-label restyle was rejected by the user, so the original role badge was preserved. The login theme button keeps its existing standalone appearance. An isolated, temporary header preview verified light/dark rendering, equal button heights, keyboard theme switching, and the logout callback without accessing authentication or the database. The preview was removed before the production build. Frontend formatting, Oxlint, TypeScript, and build passed. Evidence: `feature/header-controls`.
 
+## Per-seat fares - 2026-09-30
+
+At the user's request, OpenAI Codex changed new booking totals to the discounted per-seat fare multiplied by `seatsRequested`. The accepted rule keeps Nusrat/Rafiq's one-seat examples at `112.00`/`104.00`, rounds per-seat integer poysha before multiplication, and leaves existing quotes unchanged. A flat fare regardless of reserved seats was changed because extra seats consume extra capacity. The browser previews the total from the server's one-seat quote, while the API independently computes the authoritative total. No schema migration, payment gateway, or occupancy-based repricing was added.
+
+Verification: 34 unit tests and both integration suites passed against explicitly local PostgreSQL at port 5433. The integration suite checks the stored two-seat `224.00` request quote, driver list, member fare, and complete seat release. Frontend/backend formatting, Oxlint, TypeScript, and production builds passed. README/ERD and fare/frontend/test guides were updated. Evidence: `feature/per-seat-fares`. The separately requested video PDF remains outside the repository.
+
 ## Working rules
 
 1. Never include `.env` secrets, access tokens, or real customer data in an AI prompt.

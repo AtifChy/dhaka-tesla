@@ -6,7 +6,10 @@ const routeOptionSchema = z.object({
   destinationZone: z.string(),
   distanceMeters: z.number().int().positive(),
   corridor: z.string(),
-  estimatedFare: z.string().regex(/^\d+\.\d{2}$/),
+  estimatedFare: z
+    .string()
+    .regex(/^\d+\.\d{2}$/)
+    .describe("Estimated pooled fare for one seat, in BDT"),
   currency: z.literal("BDT"),
 });
 
