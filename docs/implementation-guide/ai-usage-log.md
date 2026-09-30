@@ -38,6 +38,10 @@ At the user's request, OpenAI Codex added a show/hide eye button to the shared l
 
 At the user's request, OpenAI Codex added a shared sun/moon button to the login/signup screen and dashboard header. It reuses the existing `next-themes` provider, saved preference, system default, and dark-mode colors; no new dependency or state store was added. CSS chooses the icon so the initial markup does not depend on the browser's theme. Frontend formatting, Oxlint, TypeScript, and production build passed. A separate local browser preview verified light/dark switching, persistence after reload, Space activation, and the existing `D` shortcut, with no browser warnings or errors. Evidence: `feature/theme-toggle`.
 
+## Header control styling — 2026-09-30
+
+At the user's request, OpenAI Codex aligned the dashboard theme and logout buttons using matching 32px ghost buttons within one shared outline. The initially suggested role-label restyle was rejected by the user, so the original role badge was preserved. The login theme button keeps its existing standalone appearance. An isolated, temporary header preview verified light/dark rendering, equal button heights, keyboard theme switching, and the logout callback without accessing authentication or the database. The preview was removed before the production build. Frontend formatting, Oxlint, TypeScript, and build passed. Evidence: `feature/header-controls`.
+
 ## Working rules
 
 1. Never include `.env` secrets, access tokens, or real customer data in an AI prompt.
