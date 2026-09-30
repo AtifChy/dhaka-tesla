@@ -2,7 +2,7 @@
 
 ## Current status
 
-The repository has 17 unit tests and two real-PostgreSQL integration tests. Vitest is a direct development dependency. The integration suites cover a final-seat race, ownership, cancellation of the last matched member, driver recovery, and late-cancellation rejection. Add further cases when the API surface expands rather than chasing a vanity coverage percentage.
+The repository has 34 unit tests and two real-PostgreSQL integration tests. Vitest is a direct development dependency. Unit tests include one/two/three-seat fare totals, rounding, invalid seat counts, and agreement between the frontend preview and backend calculation. The integration suites cover a final-seat race, persisted two-seat quotes, ownership, cancellation of the last matched member, driver recovery, and late-cancellation rejection. Add further cases when the API surface expands rather than chasing a vanity coverage percentage.
 
 Package scripts:
 
@@ -28,6 +28,7 @@ src/common/errors/
 test/
   pool-capacity.integration.spec.ts
   ride-cancellation.integration.spec.ts
+  fare-preview.unit.spec.ts
 ```
 
 ## Unit examples
@@ -41,6 +42,10 @@ describe("pooled fare", () => {
   it("calculates Rafiq's fare", () => {
     expect(calculatePooledFarePoysha(2_500)).toBe(10_400);
   });
+
+  it("charges Nusrat for two reserved seats", () => {
+    expect(calculatePooledFareBdt(3_000, 2)).toBe("224.00");
+  });
 });
 ```
 
@@ -52,25 +57,28 @@ it("rejects skipping directly from MATCHED to COMPLETED", () => {
 
 ## Required risk matrix
 
-| Risk          | Test                               | Expected result                    |
-| ------------- | ---------------------------------- | ---------------------------------- |
-| Fare          | Nusrat at 3 km                     | `112.00` BDT                       |
-| Fare          | Rafiq at 2.5 km                    | `104.00` BDT                       |
-| Matching      | Same pickup/corridor               | Compatible                         |
-| Matching      | Different pickup/corridor          | Rejected without writes            |
-| Capacity      | Fill Bullet past three seats       | `409`; occupancy remains three     |
-| Concurrency   | Nusrat/Shirin race for one seat    | One success, one `POOL_FULL`       |
-| Lifecycle     | `MATCHED -> COMPLETED`             | `409`; no state change             |
-| Ownership     | Nusrat reads/cancels Rafiq request | `404`; Rafiq unchanged             |
-| Role          | Passenger calls driver command     | `403`                              |
-| Auth          | Missing/bad/expired JWT            | `401`                              |
-| Cancellation  | Requested/matched                  | Allowed with event; seats released |
-| Cancellation  | Arrived/started                    | Rejected; unchanged                |
-| Validation    | Bad DTO                            | Stable `VALIDATION_ERROR`          |
-| Serialization | User/ride responses                | No password/private relations      |
-| Audit         | Complete trip                      | Ordered events explain transitions |
-| Seed          | Run twice                          | No duplicate users/vehicle         |
-| Docker        | Fresh volumes                      | Migrate, seed, API, web healthy    |
+| Risk            | Test                                  | Expected result                                       |
+| --------------- | ------------------------------------- | ----------------------------------------------------- |
+| Fare            | Nusrat at 3 km                        | `112.00` BDT                                          |
+| Fare            | Rafiq at 2.5 km                       | `104.00` BDT                                          |
+| Multi-seat fare | Two/three seats on both demo routes   | Nusrat `224.00`/`336.00`; Rafiq `208.00`/`312.00`     |
+| Fare preview    | Frontend preview versus backend total | Equal for one, two, and three seats; exact poysha     |
+| Stored quote    | Create/accept a two-seat booking      | Request, driver list, and member fare remain `224.00` |
+| Matching        | Same pickup/corridor                  | Compatible                                            |
+| Matching        | Different pickup/corridor             | Rejected without writes                               |
+| Capacity        | Fill Bullet past three seats          | `409`; occupancy remains three                        |
+| Concurrency     | Nusrat/Shirin race for one seat       | One success, one `POOL_FULL`                          |
+| Lifecycle       | `MATCHED -> COMPLETED`                | `409`; no state change                                |
+| Ownership       | Nusrat reads/cancels Rafiq request    | `404`; Rafiq unchanged                                |
+| Role            | Passenger calls driver command        | `403`                                                 |
+| Auth            | Missing/bad/expired JWT               | `401`                                                 |
+| Cancellation    | Requested/matched                     | Allowed with event; seats released                    |
+| Cancellation    | Arrived/started                       | Rejected; unchanged                                   |
+| Validation      | Bad DTO                               | Stable `VALIDATION_ERROR`                             |
+| Serialization   | User/ride responses                   | No password/private relations                         |
+| Audit           | Complete trip                         | Ordered events explain transitions                    |
+| Seed            | Run twice                             | No duplicate users/vehicle                            |
+| Docker          | Fresh volumes                         | Migrate, seed, API, web healthy                       |
 
 ## API testing
 

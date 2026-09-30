@@ -33,7 +33,7 @@ export class RidesService {
       );
     }
 
-    const fare = calculatePooledFareBdt(route.distanceMeters);
+    const fare = calculatePooledFareBdt(route.distanceMeters, input.seatsRequested);
     const ride = await this.prisma.db.transaction(async (transaction) => {
       const created = await transaction.orm.public.Request.create({
         passengerId: user.id,
