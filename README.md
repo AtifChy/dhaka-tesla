@@ -71,6 +71,7 @@ erDiagram
     int id PK
     int passengerId FK
     string status
+    int seatsRequested
     decimal estimatedFare
     decimal quotedFare
   }
@@ -116,12 +117,15 @@ Money is stored as PostgreSQL `Decimal` BDT with database checks for non-negativ
 The deliberately hand-testable rule is:
 
 ```text
-solo fare = BDT 80.00 + BDT 20.00 per kilometre
-pooled fare = solo fare × 80% (20% pool discount)
+solo fare per seat = BDT 80.00 + BDT 20.00 per kilometre
+pooled fare per seat = solo fare per seat × 80% (20% pool discount)
+booking total = pooled fare per seat × seats requested
 ```
 
-- Nusrat, Banani → Mohakhali, 3 km: `(80 + 20 × 3) × 0.8 = BDT 112.00`.
-- Rafiq, Banani → Gulshan 1, 2.5 km: `(80 + 20 × 2.5) × 0.8 = BDT 104.00`.
+- Nusrat, Banani → Mohakhali, 3 km, one seat: `(80 + 20 × 3) × 0.8 × 1 = BDT 112.00`. Two seats cost `224.00`; three cost `336.00`.
+- Rafiq, Banani → Gulshan 1, 2.5 km, one seat: `(80 + 20 × 2.5) × 0.8 × 1 = BDT 104.00`. Two seats cost `208.00`; three cost `312.00`.
+
+Round the discounted per-seat fare to the nearest integer poysha, then multiply by reserved seats. Route options expose a one-seat quote; the frontend scales it for the preview, and the backend independently computes the booking total when creating the request. Request and pool-membership fares store that total, not the per-seat amount. Quotes are fixed at creation, and existing bookings are not repriced. The discount is applied upfront regardless of pool occupancy; another passenger joining or canceling does not change the quote.
 
 `CASH` and simulated `TESLAPAY` are accepted payment choices. No real payment gateway is used.
 
@@ -162,7 +166,7 @@ Swagger UI: `http://localhost:3000/docs`
 | `POST` | `/auth/register/driver`              | Public          | Atomically register a driver and their initially offline vehicle.  |
 | `POST` | `/auth/login`                        | Public          | Return a 15-minute bearer token.                                   |
 | `GET`  | `/auth/me`                           | Authenticated   | Return validated token identity after a fresh database user check. |
-| `GET`  | `/rides/options`                     | Passenger       | List fixed route choices and quotes.                               |
+| `GET`  | `/rides/options`                     | Passenger       | List fixed route choices and one-seat quotes.                      |
 | `POST` | `/rides`                             | Passenger       | Create a ride request and initial event.                           |
 | `GET`  | `/rides/me`                          | Passenger       | List only the current passenger's rides.                           |
 | `GET`  | `/rides/:id`                         | Passenger owner | Read one owned ride.                                               |
@@ -289,8 +293,9 @@ bun run test:integration
 
 Verified results through 2026-09-30:
 
-- 17 unit tests pass, including fare, route, transition, and rate-limit behavior.
+- 34 unit tests pass, including per-seat booking totals, frontend/backend fare-preview agreement, route, transition, and rate-limit behavior.
 - Two real-PostgreSQL integration tests pass: the last-seat race and cancellation/ownership/lifecycle recovery. They clean isolated fixtures with Prisma 8 `deleteAll()`.
+- The cancellation suite verifies that a two-seat request persists a `224.00` quote, carries that total to the driver list and pool membership, and releases both seats on cancellation.
 - Prisma reports contract/migration storage hash `7f2bec48f98e75de0632ab253abd2209a7beac48cfeea429276f50330f6a4284` as current.
 - Docker migration/seed exits `0`; PostgreSQL and API health checks pass.
 - Nusrat login, authenticated identity, Swagger, fare quotes, pooling, lifecycle completion, and late-cancel rejection were smoke-tested.

@@ -90,9 +90,9 @@ The API wrapper:
 ## Passenger flow
 
 1. Register or log in.
-2. Load server-owned route options and fares.
+2. Load server-owned route options and one-seat fares.
 3. Choose pickup, destination, seats, and Cash/TeslaPay.
-4. Submit a request; no authoritative fare is calculated in the browser.
+4. Preview the booking total by multiplying the server's one-seat quote by selected seats using integer poysha. Submit only route, seats, and payment choice; the API recalculates the authoritative total.
 5. View waiting, matched, arrived, started, completed, or canceled status.
 6. Cancel only while the API exposes a cancelable state.
 

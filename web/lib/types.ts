@@ -29,7 +29,7 @@ export interface RouteOption {
   destinationZone: string;
   distanceMeters: number;
   corridor: string;
-  estimatedFare: string;
+  estimatedFare: string; // One-seat quote; the booking total scales with reserved seats.
   currency: "BDT";
 }
 

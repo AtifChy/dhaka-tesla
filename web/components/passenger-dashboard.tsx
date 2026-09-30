@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError, apiRequest, errorMessage } from "@/lib/api";
+import { estimateFareForSeats } from "@/lib/fare";
 import type { AuthSession, PaymentMethod, Ride, RouteOption } from "@/lib/types";
 
 interface PassengerDashboardProps {
@@ -212,7 +213,9 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
         <Card>
           <CardHeader>
             <CardTitle>Request a ride</CardTitle>
-            <CardDescription>Fares already include the 20% pooling discount.</CardDescription>
+            <CardDescription>
+              Each reserved seat is charged with the 20% pooling discount.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -307,9 +310,17 @@ export function PassengerDashboard({ session, onUnauthorized }: PassengerDashboa
                   <div className="rounded-xl border bg-muted/50 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm text-muted-foreground">Estimated pooled fare</p>
+                        <p className="text-sm text-muted-foreground">Estimated booking total</p>
                         <p className="mt-1 text-3xl font-semibold">
-                          {selectedRoute.currency} {selectedRoute.estimatedFare}
+                          {selectedRoute.currency}{" "}
+                          {estimateFareForSeats(
+                            selectedRoute.estimatedFare,
+                            Number(seatsRequested),
+                          )}
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {selectedRoute.currency} {selectedRoute.estimatedFare} per seat ×{" "}
+                          {seatsRequested} {seatsRequested === "1" ? "seat" : "seats"}
                         </p>
                       </div>
                       <Badge variant="secondary">
