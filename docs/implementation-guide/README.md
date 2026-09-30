@@ -55,11 +55,7 @@ Do not mark a step complete merely because it appears in this guide. Use each ac
 13. [End-to-end execution checklist](12-execution-checklist.md)
 14. [AI usage log](ai-usage-log.md)
 
-Recording aid: [six-minute demo video script](../demo-video-script.md).
-
-## Copy-ready backend implementation
-
-The step-by-step chapters above explain the decisions. The [backend code guide](backend-code/README.md) maps those decisions to files. The checked-in source is authoritative where an explanatory excerpt and the current implementation differ.
+The step-by-step chapters explain the decisions. The checked-in source under `src/` is authoritative where an explanatory excerpt and the current implementation differ.
 
 ## Definition of done
 
