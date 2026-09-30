@@ -327,7 +327,19 @@ Completed, tested feature branches are merged into `master` with merge commits, 
 
 ## Deployment
 
-The public frontend demo is linked above. Pushing a branch does not prove that the hosted frontend and backend have both redeployed, so verify the live route list and a complete ride flow before submitting the public URL as an end-to-end deployment. The local Docker Compose stack remains the reproducible fallback: `docker compose up --build --wait` starts PostgreSQL, runs migrations and seed data, then starts the API and web app. Use only confirmed free-tier hosting; do not pay for deployment.
+The public deployment uses free or trial services only:
+
+| Component   | Hosting service                      | Plan       |
+| ----------- | ------------------------------------ | ---------- |
+| Frontend    | Vercel                               | Free tier  |
+| Backend API | Railway                              | Free trial |
+| Database    | Prisma Postgres (managed PostgreSQL) | Free tier  |
+
+No paid hosting is used for this assignment. Railway is a free trial, not a permanent free tier, so hosted availability depends on provider limits and the trial remaining active. Prisma Postgres is the hosted database service; Prisma 8 is the ORM used by the backend.
+
+The public frontend demo is linked above. Pushing a branch does not prove that the hosted frontend and backend have both redeployed, so verify the live route list and a complete ride flow before submitting the public URL as an end-to-end deployment.
+
+The local Docker Compose stack remains the reproducible fallback if a free-tier limit is reached or the Railway trial ends: `docker compose up --build --wait` starts PostgreSQL, runs migrations and seed data, then starts the API and web app. No hosted service or paid upgrade is needed to run this local stack.
 
 ## Trade-offs and next improvements
 
@@ -339,7 +351,7 @@ The public frontend demo is linked above. Pushing a branch does not prove that t
 | Decimal BDT storage with integer-poysha calculation | Human-readable exact amounts and safe arithmetic                      | A payment ledger or multi-currency accounting is introduced           |
 | Simulated TeslaPay                                  | Covers payment choice without handling real money                     | A real gateway, reconciliation, or refunds are required               |
 
-This MVP has no live maps, traffic/weather pricing, real payments, driver identity verification, push notifications, or production-grade operations/monitoring. The fixed catalog does not support arbitrary addresses. A public frontend URL exists, but a complete hosted backend/database ride flow still needs independent verification; Docker Compose is the reproducible fallback.
+This MVP has no live maps, traffic/weather pricing, real payments, driver identity verification, push notifications, or production-grade operations/monitoring. The fixed catalog does not support arbitrary addresses. The frontend, backend, and database are hosted on the free/trial services listed above, but a complete hosted ride flow still needs independent verification; Docker Compose is the reproducible fallback.
 
 ## Submission media
 
