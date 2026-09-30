@@ -1,6 +1,20 @@
+<div align="center">
+
 # Dhaka Tesla Pool
 
-Live demo: [https://dhaka-tesla-tau.vercel.app/](https://dhaka-tesla-tau.vercel.app/)
+[![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-8-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Node.js](https://img.shields.io/badge/Node.js-24-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.4-F9F1E1?logo=bun&logoColor=black)](https://bun.sh/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+
+[**Live Demo**](https://dhakatesla.vercel.app/)
+
+</div>
 
 A small Tesla ride-pooling MVP for Dhaka. The implemented backend uses NestJS on Fastify, Prisma 8 ORM, PostgreSQL, Zod DTOs, Passport JWT authentication, Swagger, and Docker Compose. The frontend uses Next.js 16, React 19 with React Compiler, shadcn/ui, Tailwind CSS 4, TypeScript 7, Oxfmt, and Oxlint.
 
@@ -232,9 +246,9 @@ Prerequisites: Bun 1.4.x and Docker.
 bun install
 cp .env.example .env
 bun run db:up
-bun --env-file=.env run migrate
-bun --env-file=.env run db:seed
-bun --env-file=.env run dev
+bun run migrate
+bun run db:seed
+bun run dev
 ```
 
 In a second terminal:
@@ -250,9 +264,9 @@ The frontend runs on `http://localhost:3001` and proxies `/api/v1` to the backen
 Useful database commands:
 
 ```bash
-bun --env-file=.env run contract:emit
-bun --env-file=.env run migration:status
-bun --env-file=.env run db:verify
+bun run contract:emit
+bun run migration:status
+bun run db:verify
 ```
 
 ## Verification
@@ -329,7 +343,7 @@ This MVP has no live maps, traffic/weather pricing, real payments, driver identi
 
 ## Submission media
 
-README screenshots/GIFs and the maximum six-minute release walkthrough have not yet been captured. The recording script is in [docs/demo-video-script.md](docs/demo-video-script.md). Add the final media and video URL here only after recording and checking the `release/v1.0.0` build; do not substitute a development-branch capture.
+README screenshots/GIFs and the maximum six-minute release walkthrough have not yet been captured. Add the final media and video URL here after recording and checking the `release/v1.0.0` build.
 
 ## AI usage disclosure
 
