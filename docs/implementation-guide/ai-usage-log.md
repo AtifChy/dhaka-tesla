@@ -34,6 +34,10 @@ At the user's request, OpenAI Codex removed the video-script Markdown file from 
 
 At the user's request, OpenAI Codex added a show/hide eye button to the shared login and passenger/driver signup password field. It uses local state, keeps passwords hidden by default, re-hides them when switching login/signup or choosing a demo account, and never submits the form. The existing password value, validation, and autocomplete behavior are unchanged. Frontend Oxlint, TypeScript, formatting, and production build passed. A separate local browser preview verified mouse/keyboard toggling, both signup roles, and the mode-change reset without submitting credentials. Evidence: `feature/password-visibility`.
 
+## Theme toggle — 2026-09-30
+
+At the user's request, OpenAI Codex added a shared sun/moon button to the login/signup screen and dashboard header. It reuses the existing `next-themes` provider, saved preference, system default, and dark-mode colors; no new dependency or state store was added. CSS chooses the icon so the initial markup does not depend on the browser's theme. Frontend formatting, Oxlint, TypeScript, and production build passed. A separate local browser preview verified light/dark switching, persistence after reload, Space activation, and the existing `D` shortcut, with no browser warnings or errors. Evidence: `feature/theme-toggle`.
+
 ## Working rules
 
 1. Never include `.env` secrets, access tokens, or real customer data in an AI prompt.

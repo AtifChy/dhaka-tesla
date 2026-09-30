@@ -3,6 +3,7 @@
 import { CarFront, CircleCheck, Eye, EyeOff, LoaderCircle, MapPin, Users } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,6 +86,9 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
   return (
     <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(circle_at_top_left,var(--color-primary)_0,transparent_34%),linear-gradient(to_bottom_right,var(--color-background),var(--color-muted))]">
       <div className="absolute inset-0 bg-background/75" />
+      <div className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6">
+        <ThemeToggle />
+      </div>
       <div className="relative mx-auto grid min-h-svh max-w-6xl items-center gap-12 px-4 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-6">
         <section className="max-w-xl">
           <div className="mb-8 inline-flex items-center gap-3 rounded-full border bg-background/80 px-4 py-2 text-sm shadow-sm backdrop-blur">
