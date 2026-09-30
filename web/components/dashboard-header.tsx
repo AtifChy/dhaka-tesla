@@ -25,15 +25,25 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
             <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-3">
           <Badge variant="secondary" className="hidden sm:inline-flex">
             {user.role === "DRIVER" ? "Driver" : "Passenger"}
           </Badge>
-          <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={onLogout}>
-            <LogOut />
-            <span className="hidden sm:inline">Log out</span>
-          </Button>
+          <div className="flex items-center gap-1 rounded-lg border bg-background/60 p-1">
+            <ThemeToggle compact />
+            <span className="h-4 w-px bg-border" aria-hidden="true" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Log out"
+              onClick={onLogout}
+            >
+              <LogOut aria-hidden="true" />
+              <span className="hidden sm:inline">Log out</span>
+            </Button>
+          </div>
         </div>
       </div>
     </header>
