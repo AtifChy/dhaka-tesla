@@ -2,6 +2,7 @@
 
 import { CarFront, LogOut } from "lucide-react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { User } from "@/lib/types";
@@ -28,6 +29,7 @@ export function DashboardHeader({ user, onLogout }: DashboardHeaderProps) {
           <Badge variant="secondary" className="hidden sm:inline-flex">
             {user.role === "DRIVER" ? "Driver" : "Passenger"}
           </Badge>
+          <ThemeToggle />
           <Button variant="ghost" size="sm" onClick={onLogout}>
             <LogOut />
             <span className="hidden sm:inline">Log out</span>
